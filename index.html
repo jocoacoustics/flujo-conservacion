@@ -1,0 +1,3488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujo Unificado de Conservación - Fundación Jocotoco</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- vis-network -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['Roboto', 'Arial', 'sans-serif'],
+                        brand: ['"Garage Gothic"', 'DIN', 'Roboto', 'sans-serif'],
+                        subtitle: ['DIN', 'Roboto', 'sans-serif']
+                    },
+                    colors: {
+                        joco: {
+                            green: '#80973E',    // Peridot Jocotoco
+                            terracotta: '#942F16', // Rooibos Tea
+                            blue: '#015486',      // Imperial Blue
+                            orange: '#E7872B',    // Apricot Chocó-Tumbes
+                            olive: '#5F611E',     // Calla Green
+                            ochre: '#A88529',     // Green Sulphur
+                            brown: '#663C20'      // Sorrel Horse
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @font-face {
+            font-family: 'Garage Gothic';
+            src: local('Garage Gothic'), local('GarageGothic-Regular');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Garage Gothic';
+            src: local('Garage Gothic Bold'), local('GarageGothic-Bold');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'DIN';
+            src: local('DIN'), local('DIN-Regular');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'DIN';
+            src: local('DIN Bold'), local('DIN-Bold');
+            font-weight: 700;
+        }
+
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', Arial, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        h1, h2, h3, .brand-font { font-family: 'Garage Gothic', 'Roboto', sans-serif; }
+        .subtitle-font { font-family: 'DIN', 'Roboto', sans-serif; }
+        
+        #app-container { display: flex; height: 100vh; width: 100vw; position: relative; }
+        #network-container { flex-grow: 1; height: 100%; position: relative; transition: background 0.3s ease; }
+        #mynetwork { width: 100%; height: 100%; outline: none; }
+        
+        /* ================================================= */
+        /* MANUAL DE MARCA JOCOTOCO & TEMAS                  */
+        /* ================================================= */
+
+        /* 1. MODO NOCTURNO (DARK) */
+        body.theme-dark {
+            background-color: #011624;
+            color: #f8fafc;
+        }
+        body.theme-dark #network-container {
+            background-color: #011b2b;
+        }
+        body.theme-dark .glass-panel {
+            background: rgba(12, 18, 30, 0.92);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.6);
+        }
+        body.theme-dark #search-input {
+            background-color: rgba(23, 35, 56, 0.85);
+            border-color: #2a3b53;
+            color: #ffffff;
+        }
+        body.theme-dark #search-input::placeholder { color: #94a3b8; }
+        body.theme-dark #side-panel {
+            background: #0c121e;
+            color: #f8fafc;
+            border-left-color: #243447;
+            box-shadow: -10px 0 35px rgba(0, 0, 0, 0.6);
+        }
+        body.theme-dark .panel-header {
+            background: #012b48;
+            border-bottom-color: #243447;
+        }
+        body.theme-dark .panel-content {
+            background: #0c121e;
+        }
+        body.theme-dark .micro-card {
+            background: #141f2e;
+            border-color: #243447;
+            color: #f8fafc;
+        }
+        body.theme-dark .micro-card-detail {
+            background: #0b111a;
+            border-color: #1e2c3d;
+            color: #cbd5e1;
+        }
+        body.theme-dark .dep-card {
+            background: #141f2e;
+            border-color: #243447;
+        }
+
+        /* 2. MODO SEPIA (WARM PARCHMENT) */
+        body.theme-sepia {
+            background-color: #f4ede2;
+            color: #43301e;
+        }
+        body.theme-sepia #network-container {
+            background: radial-gradient(circle at center, #fdfaf4 0%, #eddcc8 100%);
+        }
+        body.theme-sepia .glass-panel {
+            background: rgba(247, 241, 231, 0.95);
+            border-color: rgba(180, 145, 110, 0.4);
+            color: #43301e;
+            box-shadow: 0 16px 36px -6px rgba(90, 60, 30, 0.22);
+        }
+        body.theme-sepia #search-input {
+            background-color: #f5ede0;
+            border-color: #cbb399;
+            color: #43301e;
+        }
+        body.theme-sepia #search-input::placeholder { color: #8c735d; }
+        body.theme-sepia #side-panel {
+            background: #fdfaf4;
+            color: #43301e;
+            border-left-color: #e3d4c3;
+            box-shadow: -10px 0 35px rgba(90, 60, 30, 0.18);
+        }
+        body.theme-sepia .panel-header {
+            background: #f3e8da;
+            border-bottom-color: #e3d4c3;
+        }
+        body.theme-sepia .panel-content {
+            background: #fdfaf4;
+        }
+        body.theme-sepia .micro-card {
+            background: #f8f1e6;
+            border-color: #e2d5c3;
+            color: #43301e;
+        }
+        body.theme-sepia .micro-card-detail {
+            background: #fdfaf4;
+            border-color: #e8dbcc;
+            color: #5c4531;
+        }
+        body.theme-sepia .dep-card {
+            background: #f8f1e6;
+            border-color: #e2d5c3;
+        }
+        body.theme-sepia .theme-switcher-box {
+            background: #e8dccf !important;
+            border-color: #cbb399 !important;
+        }
+
+        /* 3. MODO LIGHT (CLARO INSTITUCIONAL) */
+        body.theme-light {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        body.theme-light #network-container {
+            background: radial-gradient(circle at center, #ffffff 0%, #e8eef5 100%);
+        }
+        body.theme-light .glass-panel {
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(226, 232, 240, 0.9);
+            color: #0f172a;
+            box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.14);
+        }
+        body.theme-light #search-input {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        body.theme-light #search-input::placeholder { color: #64748b; }
+        body.theme-light #side-panel {
+            background: #ffffff;
+            color: #0f172a;
+            border-left-color: #e2e8f0;
+            box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
+        }
+        body.theme-light .panel-header {
+            background: #f8fafc;
+            border-bottom-color: #e2e8f0;
+        }
+        body.theme-light .panel-content {
+            background: #ffffff;
+        }
+        body.theme-light .micro-card {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #0f172a;
+        }
+        body.theme-light .micro-card-detail {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+        body.theme-light .dep-card {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        body.theme-light .theme-switcher-box {
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+
+        /* Side panel */
+        #side-panel {
+            width: 490px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 30;
+        }
+        #side-panel.open { transform: translateX(0); }
+        .panel-header { padding: 1.5rem; position: relative; }
+        .panel-content { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+        .close-btn {
+            position: absolute; top: 1.25rem; right: 1.25rem;
+            cursor: pointer; transition: all 0.2s;
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            border-width: 1px;
+            transition: all 0.28s ease;
+        }
+        
+        /* Minimización del Panel Flotante */
+        #control-panel {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #control-panel.minimized {
+            width: auto;
+            max-width: 380px;
+        }
+        #control-panel.minimized #panel-expandable-content {
+            display: none;
+        }
+
+        .team-btn {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .team-btn.active {
+            box-shadow: 0 0 14px currentColor;
+        }
+
+        .person-chip {
+            transition: all 0.15s ease-in-out;
+            cursor: pointer;
+        }
+        .person-chip:hover {
+            transform: translateY(-1px);
+        }
+        .person-chip.active {
+            background-color: #E7872B !important;
+            color: #ffffff !important;
+            border-color: #E7872B !important;
+            box-shadow: 0 0 12px rgba(231, 135, 43, 0.6);
+            font-weight: 700;
+        }
+
+        /* Botones de Tema */
+        .theme-btn {
+            color: #94a3b8;
+        }
+        .theme-btn.active {
+            background-color: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        body.theme-dark .theme-btn.active {
+            background-color: #243447;
+            color: #ffffff;
+        }
+        body.theme-sepia .theme-btn.active {
+            background-color: #80973E;
+            color: #ffffff;
+        }
+        
+        body.theme-light .person-chip, body.theme-light .team-btn {
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+        }
+        body.theme-sepia .person-chip, body.theme-sepia .team-btn {
+            color: #43301e !important;
+            border-color: #cbb399 !important;
+        }
+        body.theme-dark .team-btn.active, body.theme-light .team-btn.active, body.theme-sepia .team-btn.active {
+            color: #ffffff !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        @media (max-width: 768px) {
+            #side-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body class="theme-dark">
+
+    <div id="app-container">
+        <!-- Main Network Graph Area -->
+        <div id="network-container">
+            
+            <!-- Top Control Bar / Header (Minimizable) -->
+            <div id="control-panel-wrapper" class="absolute top-4 left-4 z-20 pointer-events-auto">
+                <div id="control-panel" class="glass-panel p-4 rounded-2xl max-w-2xl">
+                    
+                    <!-- Header Info, Logo Jocotoco, Minimize Toggle & Theme Switcher -->
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <!-- Logo Oficial Jocotoco -->
+                            <div class="w-12 h-12 rounded-xl bg-white/95 p-1 shadow-md flex items-center justify-center shrink-0 border border-slate-200">
+                                <img src="data:image/png;base64,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" alt="Fundación Jocotoco" class="w-full h-full object-contain">
+                            </div>
+                            <div>
+                                <h1 class="text-sm sm:text-base font-bold tracking-tight flex items-center gap-2">
+                                    Flujo Unificado Inter-Equipos
+                                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#80973E]/20 text-[#80973E] border border-[#80973E]/40">Fundación Jocotoco</span>
+                                </h1>
+                                <p class="text-xs opacity-75 hidden sm:block">Integración estratégica: Tecnología, Especies, Paisaje e Investigación.</p>
+                            </div>
+                        </div>
+
+                        <!-- Controles de Encabezado: Minimizar y Temas -->
+                        <div class="flex items-center gap-2">
+                            <!-- Selector de Tema (Dark, Sepia, Light) -->
+                            <div class="flex items-center gap-0.5 bg-slate-800/80 p-0.5 rounded-xl border border-slate-700 theme-switcher-box">
+                                <button onclick="setTheme('dark')" id="btn-theme-dark" title="Modo Nocturno" class="theme-btn active px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-moon text-blue-400"></i> <span class="hidden md:inline text-[11px]">Noche</span>
+                                </button>
+                                <button onclick="setTheme('sepia')" id="btn-theme-sepia" title="Modo Sepia" class="theme-btn px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-book-open text-amber-500"></i> <span class="hidden md:inline text-[11px]">Sepia</span>
+                                </button>
+                                <button onclick="setTheme('light')" id="btn-theme-light" title="Modo Light" class="theme-btn px-2 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition">
+                                    <i class="fa-solid fa-sun text-yellow-500"></i> <span class="hidden md:inline text-[11px]">Light</span>
+                                </button>
+                            </div>
+
+                            <!-- Botón Minimizar / Expandir Ventana -->
+                            <button onclick="toggleMinimizePanel()" id="btn-minimize-panel" title="Minimizar / Expandir controles" 
+                                class="w-8 h-8 rounded-xl bg-slate-700/60 hover:bg-slate-600/80 border border-slate-600/60 flex items-center justify-center text-xs transition">
+                                <i id="icon-minimize" class="fa-solid fa-chevron-up"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido Expandible del Panel -->
+                    <div id="panel-expandable-content" class="mt-3 transition-all duration-300">
+                        <!-- Buscador -->
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input type="text" id="search-input" placeholder="Buscar macrotarea, microtarea o responsable..." 
+                                class="w-full rounded-lg pl-8 pr-4 py-1.5 text-xs border focus:outline-none focus:border-[#80973E] focus:ring-1 focus:ring-[#80973E] transition-all">
+                        </div>
+
+                        <!-- Filtro por Equipo con Colores del Manual de Marca -->
+                        <div class="mt-3 flex flex-wrap gap-1.5 items-center">
+                            <span class="text-[11px] font-semibold opacity-70 mr-1">Equipo:</span>
+                            <button onclick="filterTeam('all')" id="btn-team-all" class="team-btn active px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-700 text-white border border-slate-600">
+                                Todos (38)
+                            </button>
+                            <button onclick="filterTeam('tec')" id="btn-team-tec" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#38bdf8] border border-[#015486]/50 hover:bg-[#015486]/30">
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#015486] mr-1.5"></span>Tecnología (12)
+                            </button>
+                            <button onclick="filterTeam('administracion')" id="btn-team-administracion" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#5eead4] border border-[#2A7B88]/50 hover:bg-[#2A7B88]/30">
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#2A7B88] mr-1.5"></span>Administración (2)
+                            </button>
+                            <button onclick="filterTeam('especies')" id="btn-team-especies" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#a3e635] border border-[#80973E]/50 hover:bg-[#80973E]/30">
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#80973E] mr-1.5"></span>Especies (10)
+                            </button>
+                            <button onclick="filterTeam('paisaje')" id="btn-team-paisaje" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#fdba74] border border-[#E7872B]/50 hover:bg-[#E7872B]/30">
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#E7872B] mr-1.5"></span>Paisaje (6)
+                            </button>
+                            <button onclick="filterTeam('investigacion')" id="btn-team-investigacion" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#fca5a5] border border-[#942F16]/50 hover:bg-[#942F16]/30">
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#942F16] mr-1.5"></span>Investigación (7)
+                            </button>
+                        </div>
+
+                        <!-- Filtro Riguroso por Integrante / Asignado -->
+                        <div class="mt-3 pt-2.5 border-t border-slate-700/50">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-[11px] font-semibold text-[#E7872B] flex items-center gap-1.5">
+                                    <i class="fa-solid fa-user-check"></i> Filtrar por Integrante Asignado:
+                                </span>
+                                <div id="active-person-tag" class="hidden text-[10px] font-bold bg-[#E7872B]/20 text-[#E7872B] px-2 py-0.5 rounded-md border border-[#E7872B]/40 flex items-center gap-1.5">
+                                    <span>Asignado: <span id="active-person-name" class="font-bold"></span></span>
+                                    <button onclick="clearPersonFilter()" class="hover:opacity-80 ml-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap gap-1" id="person-chips-container">
+                                <!-- Tecnología -->
+                                <button onclick="filterPerson('Pedro')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Pedro">Pedro</button>
+                                <button onclick="filterPerson('Christian')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Christian">Christian</button>
+                                <button onclick="filterPerson('Andrés')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Andrés">Andrés</button>
+                                
+                                <!-- Especies -->
+                                <button onclick="filterPerson('Patricio Mena')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#80973E]/25 text-green-200 border border-[#80973E]/60" data-person="Patricio Mena">Pato Mena</button>
+                                <button onclick="filterPerson('Liz')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#80973E]/25 text-green-200 border border-[#80973E]/60" data-person="Liz">Liz</button>
+                                
+                                <!-- Paisaje -->
+                                <button onclick="filterPerson('Patricio Macas')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#E7872B]/25 text-orange-200 border border-[#E7872B]/60" data-person="Patricio Macas">Pato Macas</button>
+                                <button onclick="filterPerson('Jaime')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#E7872B]/25 text-orange-200 border border-[#E7872B]/60" data-person="Jaime">Jaime</button>
+                                <button onclick="filterPerson('Gaby')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#E7872B]/25 text-orange-200 border border-[#E7872B]/60" data-person="Gaby">Gaby</button>
+                                
+                                <!-- Investigación / Proyectos -->
+                                <button onclick="filterPerson('José León')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#942F16]/30 text-rose-200 border border-[#942F16]/60" data-person="José León">José León</button>
+                                
+                                <!-- Actores Clave de Apoyo y Autoridades -->
+                                <button onclick="filterPerson('Guardaparques')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800/80 text-slate-300 border border-slate-600" data-person="Guardaparques">Guardaparques</button>
+                                <button onclick="filterPerson('Monitores comunitarios')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800/80 text-slate-300 border border-slate-600" data-person="Monitores comunitarios">Monitores</button>
+                                <button onclick="filterPerson('Expertos validadores')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800/80 text-slate-300 border border-slate-600" data-person="Expertos validadores">Expertos</button>
+                            </div>
+                        </div>
+
+                        <!-- Leyenda de Conexiones Institucionales (Oración explicativa) -->
+                        <div class="mt-3 pt-2.5 border-t border-slate-700/50 text-[11px] opacity-85 leading-relaxed">
+                            <p class="mb-1 text-slate-300">
+                                <i class="fa-solid fa-circle-info text-[#80973E] mr-1"></i>
+                                <b>Lógica de Sinergia:</b> Las flechas continuas representan el flujo metodológico interno de cada equipo, y las líneas punteadas representan los traspasos de datos, permisos y validaciones entre equipos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones Flotantes de Navegación y Zoom -->
+            <div class="absolute bottom-5 right-5 z-20 flex flex-col gap-2 pointer-events-auto">
+                <button onclick="network.fit({animation: true})" title="Centrar Todo el Flujo" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:opacity-80 transition shadow-lg">
+                    <i class="fa-solid fa-compress"></i>
+                </button>
+                <button onclick="zoomIn()" title="Acercar (+)" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:opacity-80 transition shadow-lg">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                <button onclick="zoomOut()" title="Alejar (-)" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:opacity-80 transition shadow-lg">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <button onclick="resetPositions()" title="Restablecer Cuadrícula Ordenada" class="w-10 h-10 rounded-xl glass-panel text-[#80973E] flex items-center justify-center hover:opacity-80 transition shadow-lg">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            </div>
+
+            <!-- Canvas de vis.js -->
+            <div id="mynetwork"></div>
+        </div>
+
+        <!-- Panel Lateral Deslizable de Microtareas & Vecindad de Dependencias (2 Niveles) -->
+        <div id="side-panel">
+            <div class="panel-header border-b">
+                <button class="close-btn" onclick="closePanel()">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-2">
+                    <div id="panel-icon-container" class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md">
+                        <i id="panel-icon" class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <span id="panel-team-badge" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Equipo</span>
+                        <div id="panel-category" class="text-xs font-semibold opacity-75 mt-0.5">Categoría</div>
+                    </div>
+                </div>
+                <h2 id="panel-title" class="text-lg font-bold pr-6 leading-snug">Título de la Macrotarea</h2>
+            </div>
+            
+            <div class="panel-content">
+                <!-- SECCIÓN 1: MAPA DE DEPENDENCIAS E IMPACTO (VECINDAD DE 2 NIVELES) -->
+                <div id="panel-dependencies-section" class="mb-5 p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-diagram-next"></i> Impacto y Dependencias (Vecindad 2 Niveles)
+                        </span>
+                        <span class="text-[10px] opacity-75">Clic para navegar</span>
+                    </div>
+
+                    <!-- Predecesores (De quién depende) -->
+                    <div class="mb-2">
+                        <div class="text-[11px] font-semibold opacity-75 mb-1 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-left text-amber-500 text-[10px]"></i> Depende de (Entradas / Nivel 1 y 2):
+                        </div>
+                        <div id="panel-predecessors-list" class="flex flex-wrap gap-1 text-[11px]">
+                            <!-- Renderizado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Sucesores (Quiénes dependen de esta tarea) -->
+                    <div>
+                        <div class="text-[11px] font-semibold opacity-75 mb-1 flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-right text-emerald-500 text-[10px]"></i> Impacta a (Salidas / Nivel 1 y 2):
+                        </div>
+                        <div id="panel-successors-list" class="flex flex-wrap gap-1 text-[11px]">
+                            <!-- Renderizado dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: MICROTAREAS DETALLADAS -->
+                <div class="flex items-center justify-between text-xs font-semibold mb-3 pb-2 border-b opacity-80">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-[#80973E]"></i> 
+                        <span id="panel-count">0</span> microtareas detalladas
+                    </span>
+                    <span id="panel-team-leads" class="text-[11px] font-normal italic truncate max-w-[200px]"></span>
+                </div>
+
+                <!-- Banner de filtro activo dentro del panel -->
+                <div id="panel-person-filter-banner" class="hidden mb-3 p-2 bg-[#E7872B]/15 border border-[#E7872B]/30 rounded-lg text-xs text-[#E7872B] flex items-center justify-between">
+                    <span class="flex items-center gap-1.5 font-medium">
+                        <i class="fa-solid fa-filter"></i> Mostrando asignadas a: <b id="panel-active-person-name"></b>
+                    </span>
+                    <button onclick="clearPersonFilter()" class="hover:underline text-xs font-bold ml-2">Ver todas</button>
+                </div>
+                
+                <ul id="microtasks-list" class="space-y-3">
+                    <!-- Microtareas renderizadas dinámicamente -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // BASE DE DATOS MAESTRA UNIFICADA (4 EQUIPOS)
+        // ==========================================
+        const allTasks = {
+    "tec_1": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Respaldo de Datos de Muestreo Acústico y Fototrampeo",
+        "category": "Gestión de Datos",
+        "icon": "fa-database",
+        "microtasks": [
+            {
+                "title": "Ordenamiento y estructuración de archivos de audio, imagen y video provenientes de los monitoreos",
+                "resp": "Gaby, Liz, Andrés",
+                "time": "1 semana"
+            },
+            {
+                "title": "Recepción y validación de datos correctamente ordenados y estructurados",
+                "resp": "Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Respaldo de datos",
+                "resp": "Pedro",
+                "time": "3 días"
+            },
+            {
+                "title": "Mantenimiento y actualización de scripts",
+                "resp": "Pedro",
+                "time": "2 días (trimestral)"
+            }
+        ]
+    },
+    "tec_2": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Desarrollo de Análisis Especializados por Especie",
+        "category": "Análisis Computacional",
+        "icon": "fa-chart-pie",
+        "microtasks": [
+            {
+                "title": "Discusión sobre la problemática",
+                "resp": "Patricio Mena, Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Recopilación de datos",
+                "resp": "Patricio Mena",
+                "time": "2 semanas"
+            },
+            {
+                "title": "Depuración y estructuración de datos",
+                "resp": "Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Análisis exploratorio de datos",
+                "resp": "Pedro",
+                "time": "3 días"
+            },
+            {
+                "title": "Modelado matemático",
+                "resp": "Pedro",
+                "time": "1 semana"
+            },
+            {
+                "title": "Elaboración de reporte o dashboard",
+                "resp": "Pedro",
+                "time": "2 días"
+            }
+        ]
+    },
+    "tec_3": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Desarrollo de modelos por especie",
+        "category": "Machine Learning",
+        "icon": "fa-brain",
+        "microtasks": [
+            {
+                "title": "Determinar las especies con cantos similares a la especie de interés",
+                "resp": "Andrés, Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Obtener audios, sean propios o externos",
+                "resp": "Christian",
+                "time": "1 día"
+            },
+            {
+                "title": "Muestreo estratificado de clases y asignación de etiquetados a expertos (fonotipos, audiotipos)",
+                "resp": "Christian, Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Etiquetar los audios obtenidos en Audacity",
+                "resp": "Expertos validadores",
+                "time": "2 semanas"
+            },
+            {
+                "title": "Entrenar con los audios etiquetados un modelo de Machine Learning (ML) en Pytorch (Transfer Learning)",
+                "resp": "Christian",
+                "time": "3 días"
+            },
+            {
+                "title": "Inferencia preliminar",
+                "resp": "Christian",
+                "time": "1 día"
+            },
+            {
+                "title": "Evaluación heurísticamente y empírica de resultados",
+                "resp": "Pedro, Christian",
+                "time": "1 día"
+            },
+            {
+                "title": "Inferencia definitiva",
+                "resp": "Christian",
+                "time": "1 semana"
+            },
+            {
+                "title": "Indexación",
+                "resp": "Pedro",
+                "time": "1 semana"
+            },
+            {
+                "title": "Precalentamiento",
+                "resp": "Christian",
+                "time": "2 días"
+            },
+            {
+                "title": "Se generan paquetes de audios en la plataforma de validación asignados a cada experto",
+                "resp": "Andrés, Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Validación, los expertos revisan y corrigen las identificaciones sobre audios en la plataforma",
+                "resp": "Expertos validadores",
+                "time": "4 semanas"
+            },
+            {
+                "title": "Análisis sobre las identificaciones validadas (validador BI)",
+                "resp": "Pedro",
+                "time": "1 semana"
+            }
+        ]
+    },
+    "tec_4": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Detección de eventos acústicos generales",
+        "category": "Machine Learning",
+        "icon": "fa-volume-high",
+        "microtasks": [
+            {
+                "title": "Determinación de puntos de interés donde aplicar la inferencia de modelos generalistas a demanda",
+                "resp": "Christian, Pedro, Gabi, Pato Macas, Andrés",
+                "time": "1 día"
+            },
+            {
+                "title": "Inferencia de procesamiento computacional",
+                "resp": "Christian",
+                "time": "1 semana"
+            },
+            {
+                "title": "Ingesta automática en dataset",
+                "resp": "Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Consulta de resultados en plataforma BI Explorer",
+                "resp": "Gabi, Pato Macas, Andrés",
+                "time": "1 día"
+            }
+        ]
+    },
+    "tec_5": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Reentrenamiento de modelos generalista",
+        "category": "Machine Learning",
+        "icon": "fa-rotate-right",
+        "microtasks": [
+            {
+                "title": "Consolidación y actualización del dataset de entrenamiento",
+                "resp": "Christian",
+                "time": "2 días"
+            },
+            {
+                "title": "Reentrenamiento del modelo",
+                "resp": "Christian",
+                "time": "2 días"
+            },
+            {
+                "title": "Evaluación comparativa del modelo, informe o reporte",
+                "resp": "Christian, Pedro",
+                "time": "1 semana"
+            }
+        ]
+    },
+    "tec_6": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Asignación de recursos en Azure",
+        "category": "Infraestructura Cloud",
+        "icon": "fa-cloud",
+        "microtasks": [
+            {
+                "title": "Evaluación de requerimientos y dimensionamiento de capacidad",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Diseño de arquitectura, conectividad y control de presupuesto",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Aprovisionamiento y configuración del entorno de cómputo (VMs GPU / CUDA / Docker)",
+                "resp": "Christian",
+                "time": "4 horas"
+            },
+            {
+                "title": "Pruebas de estrés, rendimiento y validación de pipelines",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Documentación técnica, inventario y parametrización",
+                "resp": "Christian",
+                "time": "1 hora"
+            },
+            {
+                "title": "Puesta en marcha, asignación de accesos y monitoreo inicial (Azure Monitor)",
+                "resp": "Christian",
+                "time": "1 hora"
+            }
+        ]
+    },
+    "tec_7": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Dockerización de modelos en producción",
+        "category": "Infraestructura Cloud",
+        "icon": "fa-box",
+        "microtasks": [
+            {
+                "title": "Evaluación de requerimientos y gestión de dependencias",
+                "resp": "Christian",
+                "time": "1 hora"
+            },
+            {
+                "title": "Adaptación del código de inferencia e integración",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Ajuste del Dockerfile y optimización de imagen",
+                "resp": "Christian",
+                "time": "1.5 horas"
+            },
+            {
+                "title": "Construcción (Build), pruebas de integración y validación",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Documentación técnica y actualización del repositorio",
+                "resp": "Christian",
+                "time": "0.5 horas"
+            }
+        ]
+    },
+    "tec_8": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Creación de nuevo HITL Platform (Human in the loop Platform)",
+        "category": "Desarrollo Software",
+        "icon": "fa-laptop-code",
+        "microtasks": [
+            {
+                "title": "Diseño integral de la arquitectura de la plataforma y flujos de trabajo",
+                "resp": "Christian, Expertos validadores",
+                "time": "3 días"
+            },
+            {
+                "title": "Capa de ingesta, indexación y consulta rápida de predicciones",
+                "resp": "Christian",
+                "time": "3 días"
+            },
+            {
+                "title": "Desarrollo del Backend y servicios centrales de la plataforma",
+                "resp": "Christian",
+                "time": "5 días"
+            },
+            {
+                "title": "Desarrollo del Frontend Administrativo (Consola de Asignación y Seguimiento)",
+                "resp": "Christian",
+                "time": "4 días"
+            },
+            {
+                "title": "Desarrollo del Frontend del Validador (Espacio de Trabajo para Expertos)",
+                "resp": "Christian",
+                "time": "5 días"
+            },
+            {
+                "title": "Pruebas integrales de extremo a extremo, validación piloto y puesta en producción",
+                "resp": "Christian, Expertos validadores",
+                "time": "3 días"
+            }
+        ]
+    },
+    "tec_9": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Mejoras en VA-Jocotoco",
+        "category": "Desarrollo Software",
+        "icon": "fa-bug",
+        "microtasks": [
+            {
+                "title": "Diagnóstico y reproducción aislada del problema o necesidad de mejora",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Diseño de la solución técnica y análisis de impacto",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Desarrollo e integración de la solución en la aplicación",
+                "resp": "Christian",
+                "time": "4 horas"
+            },
+            {
+                "title": "Pruebas de calidad, validación de regresión y rendimiento",
+                "resp": "Christian",
+                "time": "2 horas"
+            },
+            {
+                "title": "Documentación técnica y actualización del sistema",
+                "resp": "Christian",
+                "time": "1 hora"
+            },
+            {
+                "title": "Despliegue y verificación final en el entorno de producción",
+                "resp": "Christian",
+                "time": "1 hora"
+            }
+        ]
+    },
+    "tec_10": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Desarrollo de Herramientas de Software",
+        "category": "Desarrollo Software",
+        "icon": "fa-code",
+        "microtasks": [
+            {
+                "title": "Identificación de problemáticas persistentes",
+                "resp": "Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Programación en código de un prototipo de solución",
+                "resp": "Pedro",
+                "time": "2 días"
+            },
+            {
+                "title": "Pruebas de uso",
+                "resp": "Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Iteración y mejora",
+                "resp": "Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Socialización de la herramienta con Conservación",
+                "resp": "Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Mantenimiento y actualización de scripts",
+                "resp": "Pedro",
+                "time": "2 días (trimestral)"
+            }
+        ]
+    },
+    "tec_11": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Validación de Audios y Reportes Biológicos",
+        "category": "Bioacústica & BI",
+        "icon": "fa-headphones",
+        "microtasks": [
+            {
+                "title": "Búsqueda por especie (Nueva tarea experto, anfibios o aves, filtro por paisaje)",
+                "resp": "Andrés",
+                "time": "1 día"
+            },
+            {
+                "title": "Diversidad Shannon (Nueva tarea experto, anfibios o aves, filtro por paisaje)",
+                "resp": "Andrés",
+                "time": "1 día"
+            },
+            {
+                "title": "Ticket de bugs a Christian",
+                "resp": "Pedro, Andrés",
+                "time": "1 día"
+            },
+            {
+                "title": "Elaboración de informes (descarga de audios validados por expertos y reconocidos por IA)",
+                "resp": "Andrés",
+                "time": "2 días"
+            },
+            {
+                "title": "Informes biológicos por paisaje de acuerdo a requerimientos de Conservación o donantes",
+                "resp": "Andrés",
+                "time": "1 semana por paisaje"
+            },
+            {
+                "title": "Nuevos expertos en validación de audios (pruebas y seguimiento)",
+                "resp": "Pedro, Andrés",
+                "time": "2 días"
+            }
+        ]
+    },
+    "tec_12": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Grants y Fondos Tecnológicos (Software, Hardware, Azure/AWS)",
+        "category": "Fondos Cloud & Hardware",
+        "icon": "fa-handshake",
+        "microtasks": [
+            {
+                "title": "Mapeo de Oportunidades, Alineación de Objetivos y Búsqueda de Grants (Azure, AWS, Nube)",
+                "resp": "Christian, Pedro, Recaudación de fondos",
+                "time": "7.5-10 horas"
+            },
+            {
+                "title": "Conceptualización Técnica, Arquitectura y Formulación de la Propuesta",
+                "resp": "Christian, Pedro, Recaudación de fondos",
+                "time": "17.5-25 horas"
+            },
+            {
+                "title": "Negociación de Convenios, Acuerdos Legales y Envío Formal",
+                "resp": "Christian, Pedro, Coord. Administrativa Financiera",
+                "time": "5-7.5 horas"
+            },
+            {
+                "title": "Periodo de Evaluación, Respuestas a Pares y Dictamen",
+                "resp": "Christian, Pedro",
+                "time": "3-5 horas"
+            },
+            {
+                "title": "Formalización del Convenio, Desembolso y Arranque de Infraestructura",
+                "resp": "Christian, Pedro, Coord. Administrativa Financiera",
+                "time": "4-6 horas"
+            }
+        ]
+    },
+    "tec_14": {
+        "team": "tec",
+        "teamName": "Equipo Tecnología",
+        "teamColor": "#015486",
+        "teamLeads": "Pedro, Christian, Andrés",
+        "title": "Participación en conferencias",
+        "category": "Divulgación",
+        "icon": "fa-chalkboard-user",
+        "microtasks": [
+            {
+                "title": "Días 1 a 2: Preparación Científica, Producción del Póster y Logística",
+                "resp": "Christian",
+                "time": "18 horas"
+            },
+            {
+                "title": "Días 3 a 5: Inmersión Académica, Actualización y Asistencia a Sesiones",
+                "resp": "Christian",
+                "time": "24 horas"
+            },
+            {
+                "title": "Día 6: Defensa Pública, Exposición Científica y Networking Estratégico",
+                "resp": "Christian",
+                "time": "4 horas"
+            },
+            {
+                "title": "Día 7: Cierre, Sistematización Institucional y Seguimiento",
+                "resp": "Christian",
+                "time": "4 horas"
+            }
+        ]
+    },
+    "adm_1": {
+        "team": "administracion",
+        "teamName": "Equipo Administración",
+        "teamColor": "#2A7B88",
+        "teamLeads": "Andrés",
+        "title": "Procesos Administrativos y Gestión de Permisos (Andrés)",
+        "category": "Gestión Administrativa & Legal",
+        "icon": "fa-folder-closed",
+        "microtasks": [
+            {
+                "title": "Pago de facturas a expertos en validación, consultores o compras de equipos",
+                "resp": "Andrés",
+                "time": "1 día"
+            },
+            {
+                "title": "Elaboración de contratos y adendas según formato jurídico",
+                "resp": "Andrés",
+                "time": "2 días"
+            },
+            {
+                "title": "Permisos de investigación en MAE gestionados a través de plataforma",
+                "resp": "Andrés",
+                "time": "1 mes"
+            },
+            {
+                "title": "Permisos de investigación en Jocotoco para consultores en reservas",
+                "resp": "Andrés",
+                "time": "3 semanas"
+            },
+            {
+                "title": "Revisión de observaciones a guardaparques en iNaturalist",
+                "resp": "Andrés",
+                "time": "2 semanas"
+            }
+        ]
+    },
+    "adm_2": {
+        "team": "administracion",
+        "teamName": "Equipo Administración",
+        "teamColor": "#2A7B88",
+        "teamLeads": "Pedro, Andrés, Departamento Legal y Financiero",
+        "title": "Coordinación Administrativa Externa (Pasantes/Tesistas/Proveedores)",
+        "category": "Contrataciones & Convenios",
+        "icon": "fa-users-gear",
+        "microtasks": [
+            {
+                "title": "Identificación de la necesidad y elaboración de TDR",
+                "resp": "Pedro",
+                "time": "1 día"
+            },
+            {
+                "title": "Socialización o negociaciones",
+                "resp": "Pedro, Dirección de Conservación",
+                "time": "3 días"
+            },
+            {
+                "title": "Gestión de autorizaciones, convenios, contratos, etc.",
+                "resp": "José León, Andrés, Pedro, Departamento Legal y Financiero",
+                "time": "4 semanas"
+            },
+            {
+                "title": "Seguimiento quincenal de avances",
+                "resp": "Andrés, Pedro, Christian",
+                "time": "1 día (quincenal)"
+            }
+        ]
+    },
+    "esp_1": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Muestreos Acústicos (Jocotoco, Tapaculo de El Oro, Paujíl Norteño, Pyrrhura sp.)",
+        "category": "Monitoreo Acústico",
+        "icon": "fa-microphone-lines",
+        "microtasks": [
+            {
+                "title": "Elaboración del diseño de muestreo",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            },
+            {
+                "title": "Identificación de requerimientos como personal y materiales",
+                "resp": "Patricio Mena, Liz",
+                "time": "2-3 días"
+            },
+            {
+                "title": "Elaboración de presupuesto, cronograma y comunicación interna",
+                "resp": "Patricio Mena, Liz",
+                "time": "3 días"
+            },
+            {
+                "title": "Preparación y envío de equipos (grabadoras/cámaras trampa). Configuración de equipos, carga de pilas, preparación de tarjetas SD",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 semanas"
+            },
+            {
+                "title": "Solicitud de fondos",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días"
+            },
+            {
+                "title": "Campaña de campo. Instalación de equipos (grabadoras o cámaras trampa)",
+                "resp": "Patricio Mena, Liz",
+                "time": "7-15 días"
+            },
+            {
+                "title": "Equipos activos en campo",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 meses"
+            },
+            {
+                "title": "Retiro y envío de equipos",
+                "resp": "Patricio Mena, Liz",
+                "time": "7-10 días"
+            },
+            {
+                "title": "Limpieza de equipos y descarga de información",
+                "resp": "Patricio Mena, Liz",
+                "time": "2-5 días"
+            },
+            {
+                "title": "Reporte de Gastos",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días"
+            },
+            {
+                "title": "Procesamiento de datos y entrega de resultados (Coordinación de Tecnología Aplicada)",
+                "resp": "Equipo Tecnología",
+                "time": "tiempo definido por este equipo"
+            },
+            {
+                "title": "Análisis de resultados y elaboración de informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            },
+            {
+                "title": "Implementación de acciones de conservación en campo",
+                "resp": "Patricio Mena, Liz",
+                "time": "Permanente"
+            }
+        ]
+    },
+    "esp_2": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Monitoreo de especies (Diseño y Metodología)",
+        "category": "Planificación",
+        "icon": "fa-map",
+        "microtasks": [
+            {
+                "title": "Diseño de muestreo/monitoreo y establecimiento de metodología",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            },
+            {
+                "title": "Establecimiento del cronograma y costos",
+                "resp": "Patricio Mena, Liz",
+                "time": "1 día"
+            },
+            {
+                "title": "Solicitud de fondos",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días"
+            },
+            {
+                "title": "Socialización del diseño y métodos con el personal involucrado (Simple: Comunicación virtual)",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días"
+            },
+            {
+                "title": "Socialización del diseño y métodos con el personal involucrado (Complejo: Visita a campo)",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_3": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Colibrí Estrella de Garganta Azul",
+        "category": "Monitoreo en Campo",
+        "icon": "fa-crow",
+        "microtasks": [
+            {
+                "title": "Levantamiento de información en campo. Guardaparques y monitores comunitarios (JocoApp)",
+                "resp": "Guardaparques, Monitores comunitarios",
+                "time": "12 días al mes"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días al mes"
+            },
+            {
+                "title": "Análisis de datos y actualización de informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "2-4 días"
+            }
+        ]
+    },
+    "esp_4": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Matorralero Cabecipálido",
+        "category": "Monitoreo en Campo",
+        "icon": "fa-feather",
+        "microtasks": [
+            {
+                "title": "Recolección de datos (Censo y monitoreo)",
+                "resp": "Patricio Mena, Liz",
+                "time": "7 días"
+            },
+            {
+                "title": "Análisis de información e informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_5": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Cajas nido, nidos naturales y artificiales (Pericos y Colibrí)",
+        "category": "Monitoreo Reproductivo",
+        "icon": "fa-egg",
+        "microtasks": [
+            {
+                "title": "Recolección de datos en campo",
+                "resp": "Patricio Mena, Liz",
+                "time": "10-15 días al mes"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días al mes"
+            },
+            {
+                "title": "Análisis de información y elaboración del informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_6": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Lagartija Coliazul",
+        "category": "Herpetofauna",
+        "icon": "fa-dragon",
+        "microtasks": [
+            {
+                "title": "Establecer diseño de muestreo y metodología",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            },
+            {
+                "title": "Recolección de datos en campo",
+                "resp": "Patricio Mena, Liz",
+                "time": "10-12 días al mes"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días al mes"
+            },
+            {
+                "title": "Análisis de información y elaboración del informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_7": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Cóndor Andino",
+        "category": "Grandes Aves",
+        "icon": "fa-kiwi-bird",
+        "microtasks": [
+            {
+                "title": "Establecer diseño de muestreo y metodología",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            },
+            {
+                "title": "Recolección de datos en campo por los guardaparques",
+                "resp": "Guardaparques",
+                "time": "3 días al mes"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días al mes"
+            },
+            {
+                "title": "Análisis de información y elaboración del informe (Una vez al año)",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_8": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Aves migratorias",
+        "category": "Monitoreo en Campo",
+        "icon": "fa-plane-departure",
+        "microtasks": [
+            {
+                "title": "Recolección de datos en campo (8 meses, desde septiembre hasta abril)",
+                "resp": "Patricio Mena, Liz",
+                "time": "2-6 días al mes"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1-2 días al mes"
+            },
+            {
+                "title": "Análisis de información y elaboración del informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_9": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Tortugas marinas",
+        "category": "Monitoreo Marino-Costero",
+        "icon": "fa-water",
+        "microtasks": [
+            {
+                "title": "Recolección de datos en campo (todos los días)",
+                "resp": "Guardaparques, Monitores comunitarios",
+                "time": "todos los días"
+            },
+            {
+                "title": "Verificación de información en el sistema",
+                "resp": "Patricio Mena, Liz",
+                "time": "1 vez cada tres meses"
+            },
+            {
+                "title": "Análisis de información y elaboración del informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "3-5 días"
+            }
+        ]
+    },
+    "esp_10": {
+        "team": "especies",
+        "teamName": "Equipo Especies",
+        "teamColor": "#80973E",
+        "teamLeads": "Patricio Mena, Liz",
+        "title": "Acciones de Conservación en Campo de Especies",
+        "category": "Acción Territorial",
+        "icon": "fa-shield-heart",
+        "microtasks": [
+            {
+                "title": "Análisis de datos y elaboración de informe",
+                "resp": "Patricio Mena, Liz",
+                "time": "tiempo especificado por cada actividad y especie"
+            },
+            {
+                "title": "Implementación de acciones de conservación en campo",
+                "resp": "Patricio Mena, Liz",
+                "time": "Permanente"
+            }
+        ]
+    },
+    "pai_1": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Muestreo Paisajes (Cámaras y Acústica)",
+        "category": "Monitoreo Ecológico",
+        "icon": "fa-map-location-dot",
+        "microtasks": [
+            {
+                "title": "Diseño de muestreo",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Reuniones de coordinación y solicitud de permisos (ingreso de solicitud MAE)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "7 días"
+            },
+            {
+                "title": "Validación de puntos de muestreo (campo)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "3 días"
+            },
+            {
+                "title": "Preparación de equipos, y logística (Instalación, permanencia de equipos y retiro)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "255 días"
+            },
+            {
+                "title": "Extracción, respaldo y procesamiento de información (Cámaras trampa). Los archivos de audio se envían a Pedro",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Análisis de datos e informe",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "5 días"
+            }
+        ]
+    },
+    "pai_2": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Muestreo de Especies Focalizadas (Paisaje)",
+        "category": "Monitoreo Ecológico",
+        "icon": "fa-frog",
+        "microtasks": [
+            {
+                "title": "Diseño de muestreo",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Reuniones de coordinación y solicitud de permisos (ingreso de solicitud MAE)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "7 días"
+            },
+            {
+                "title": "Validación de puntos en campo",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "3 días"
+            },
+            {
+                "title": "Preparación, instalación y permanencia de equipos",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "140 días"
+            },
+            {
+                "title": "Extracción, respaldo y procesamiento de información",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Identificación de individuos mediante uso de IA",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "15 días"
+            },
+            {
+                "title": "Análisis de datos e informe",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "5 días"
+            }
+        ]
+    },
+    "pai_3": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Estudio de Cacería",
+        "category": "Monitoreo Comunitario",
+        "icon": "fa-people-group",
+        "microtasks": [
+            {
+                "title": "Socialización, consentimiento informado, selección de monitores y familias validación de instrumentos",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Capacitación de monitores y familias",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Familias: autorregistro continuo de cacería. Revisión mensual y consolidación de base de datos",
+                "resp": "Familias locales, Patricio Macas, Jaime, Gaby",
+                "time": "12 días"
+            },
+            {
+                "title": "Monitores: muestreos mediante transectos lineales. Revisión mensual y consolidación de base de datos",
+                "resp": "Monitores comunitarios, Patricio Macas, Jaime, Gaby",
+                "time": "12 días"
+            },
+            {
+                "title": "Análisis de datos y estadísticos",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Talleres comunitarios, presentación de resultados, retroalimentación y validación comunitaria",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Informe final, consolidación de bases de datos y presentación final del proyecto",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "20 días"
+            }
+        ]
+    },
+    "pai_4": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Patrullajes Comunitarios de Vigilancia",
+        "category": "Vigilancia Territorial",
+        "icon": "fa-shield-halved",
+        "microtasks": [
+            {
+                "title": "Preparación de formulario",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Capacitaciones permanentes a comuneros",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "16 días"
+            },
+            {
+                "title": "Análisis de la información de los patrullajes comunitarios e informe trimestral",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "12 días"
+            }
+        ]
+    },
+    "pai_5": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Interacciones Gente-Fauna Silvestre (Mitigación)",
+        "category": "Mitigación de Conflictos",
+        "icon": "fa-house-chimney-crack",
+        "microtasks": [
+            {
+                "title": "Levantamiento de información mediante encuestas (Relacionamiento comunitario)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "Depende de Relacionamiento Territorial"
+            },
+            {
+                "title": "Compra de equipos",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Evaluación de riesgo en fincas",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "40 días"
+            },
+            {
+                "title": "Entrega de disuasivos (Relacionamiento comunitario)",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "Depende de Relacionamiento Territorial"
+            },
+            {
+                "title": "Reuniones de seguimiento",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "30 días"
+            },
+            {
+                "title": "Análisis de información e informe semestral",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "6 días"
+            }
+        ]
+    },
+    "pai_6": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Patricio Macas, Jaime, Gaby",
+        "title": "Monitoreo de Primates (Balsas, Buenaventura)",
+        "category": "Monitoreo Ecológico",
+        "icon": "fa-monkey",
+        "microtasks": [
+            {
+                "title": "Diseño de muestreo",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Reuniones de coordinación en reservas",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "3 días"
+            },
+            {
+                "title": "Organización de logística y trabajo en campo",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "17 días"
+            },
+            {
+                "title": "Extracción y procesamiento de información",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "2 días"
+            },
+            {
+                "title": "Análisis e informe",
+                "resp": "Patricio Macas, Jaime, Gaby",
+                "time": "5 días"
+            }
+        ]
+    },
+    "inv_1": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Elaboración de planes de acción de especies amenazadas",
+        "category": "Estrategia de Conservación",
+        "icon": "fa-clipboard-list",
+        "microtasks": [
+            {
+                "title": "Revisión bibliográfica y primer borrador",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Director de Conservación",
+                "time": "45 días"
+            },
+            {
+                "title": "Revisión de Dirección del primer borrador",
+                "resp": "Dirección Ejecutiva / Martín",
+                "time": "10 días"
+            },
+            {
+                "title": "Identificación de expertos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "5 días"
+            },
+            {
+                "title": "Convocatoria a taller de validación con expertos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "5 días"
+            },
+            {
+                "title": "Diseño metodológico del taller",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador",
+                "time": "5 días"
+            },
+            {
+                "title": "Agenda y logística del taller",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador",
+                "time": "3 días"
+            },
+            {
+                "title": "Taller de validación con expertos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador / Actores",
+                "time": "2 días"
+            },
+            {
+                "title": "Digitalización y envío de productos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Edición final del primer borrador y matriz",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "3 días"
+            },
+            {
+                "title": "Envío del primer borrador Plan de Acción",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Identificación de actores territoriales",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Equipo territorial",
+                "time": "24 días"
+            },
+            {
+                "title": "Convocatoria a taller de validación",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "15 días"
+            },
+            {
+                "title": "Diseño metodológico del taller",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador",
+                "time": "15 días"
+            },
+            {
+                "title": "Agenda y logística del taller",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador",
+                "time": "9 días"
+            },
+            {
+                "title": "Taller de validación en territorio",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Facilitador / Actores",
+                "time": "6 días"
+            },
+            {
+                "title": "Digitalización y envío de productos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "3 días"
+            },
+            {
+                "title": "Edición final del plan y matriz",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "9 días"
+            },
+            {
+                "title": "Envío del Plan de Acción",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "3 días"
+            },
+            {
+                "title": "Revisión MAE/MAATE y oficialización",
+                "resp": "MAE",
+                "time": "365 días"
+            },
+            {
+                "title": "Archivo y socialización interna",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Comunicación",
+                "time": "5 días"
+            },
+            {
+                "title": "Plan operativo y asignación de responsables",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Director de Conservación / Departamentos de Reservas y Relacionamiento Territorial",
+                "time": "5 días"
+            }
+        ]
+    },
+    "inv_2": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Tramitación y seguimiento de permisos de investigación",
+        "category": "Gestión Legal & MAE",
+        "icon": "fa-file-signature",
+        "microtasks": [
+            {
+                "title": "Solicitud de investigación",
+                "resp": "Investigador principal",
+                "time": "1 día"
+            },
+            {
+                "title": "Envío de requisitos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Entrega de documentos",
+                "resp": "Investigador principal",
+                "time": "10 días"
+            },
+            {
+                "title": "Revisión y aprobación",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "2 días"
+            },
+            {
+                "title": "Envío de permiso y documentación según reserva",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Recepción y archivo de permiso firmado",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Coordinación logística",
+                "resp": "Ejecutiva de Ventas de Jocotours",
+                "time": "6 días"
+            },
+            {
+                "title": "Comunicación a campo",
+                "resp": "Analista de Reservas",
+                "time": "1 día"
+            },
+            {
+                "title": "Supervisión en reserva",
+                "resp": "Personal de campo",
+                "time": "2 días"
+            },
+            {
+                "title": "Solicitud de informe final",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Archivo en sistema de información",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Divulgación de resultados",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación + Comunicación",
+                "time": "3 días"
+            }
+        ]
+    },
+    "inv_3": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Elaboración y seguimiento de convenios y contratos",
+        "category": "Alianzas Institucionales",
+        "icon": "fa-handshake-simple",
+        "microtasks": [
+            {
+                "title": "Solicitud inicial",
+                "resp": "Socio / investigador / área solicitante",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión de pertinencia y envío de requisitos",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Entrega de documentos",
+                "resp": "Socio / investigador / área solicitante",
+                "time": "10 días"
+            },
+            {
+                "title": "Elaboración del borrador",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión y aprobación inicial del socio",
+                "resp": "Socio / investigador / área solicitante",
+                "time": "2 días"
+            },
+            {
+                "title": "Revisión interna financiera y legal",
+                "resp": "Departamento Legal y financiero",
+                "time": "14 días"
+            },
+            {
+                "title": "Firma",
+                "resp": "Representantes legales / partes involucradas",
+                "time": "4 días"
+            },
+            {
+                "title": "Archivo y comunicación interna",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Talento Humano",
+                "time": "1 día"
+            },
+            {
+                "title": "Inicio y seguimiento (cada 3 meses y cierre)",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "15 días"
+            },
+            {
+                "title": "Recepción de productos y cierre",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "5 días"
+            },
+            {
+                "title": "Divulgación o uso institucional",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            }
+        ]
+    },
+    "inv_4": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Tramitación y seguimiento de prácticas preprofesionales",
+        "category": "Desarrollo Académico",
+        "icon": "fa-graduation-cap",
+        "microtasks": [
+            {
+                "title": "Solicitud inicial de prácticas",
+                "resp": "Estudiante / Universidad",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión de pertinencia y cupo",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "3 días"
+            },
+            {
+                "title": "Definición de área y tutor institucional",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Solicitud y entrega de documentos",
+                "resp": "Estudiante / Universidad",
+                "time": "10 días"
+            },
+            {
+                "title": "Redacción de carta de aceptación o acuerdo",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión documental",
+                "resp": "Departamento Legal y Financiero",
+                "time": "14 días"
+            },
+            {
+                "title": "Aprobación y firma",
+                "resp": "Representante Legal / Estudiante / Universidad",
+                "time": "3 días"
+            },
+            {
+                "title": "Archivo del expediente",
+                "resp": "Talento Humano",
+                "time": "1 día"
+            },
+            {
+                "title": "Comunicación interna e inducción",
+                "resp": "Talento Humano / Área receptora",
+                "time": "1 día"
+            },
+            {
+                "title": "Inicio de prácticas (hasta 60 días)",
+                "resp": "Estudiante / Tutor institucional",
+                "time": "60 días"
+            },
+            {
+                "title": "Seguimiento técnico y académico",
+                "resp": "Tutor institucional / Universidad",
+                "time": "10 días"
+            },
+            {
+                "title": "Entrega y revisión de informe final",
+                "resp": "Estudiante / Tutor institucional",
+                "time": "5 días"
+            },
+            {
+                "title": "Evaluación final",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Certificado y cierre de expediente",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            }
+        ]
+    },
+    "inv_5": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Manejo de bases de datos de investigación",
+        "category": "Gestión del Conocimiento",
+        "icon": "fa-folder-tree",
+        "microtasks": [
+            {
+                "title": "Identificación del registro o actualización requerida",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Recepción de información o documento base",
+                "resp": "Investigador / Socio",
+                "time": "1 día"
+            },
+            {
+                "title": "Clasificación del tipo de registro (acuerdos, convenios, permisos, papers)",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión de integridad de la información",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Carga en base de datos respectiva",
+                "resp": "Coordinación de Investigación / Administración",
+                "time": "1 día"
+            }
+        ]
+    },
+    "inv_6": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Manejo de bases de datos de especies",
+        "category": "Biodiversidad & Big Data",
+        "icon": "fa-dna",
+        "microtasks": [
+            {
+                "title": "Identificación del registro o actualización requerida",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Recepción de información o documento base",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Revisión y validación de registros (+50.000 registros)",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Pasante / Equipo de Tecnología Aplicada",
+                "time": "90 días"
+            },
+            {
+                "title": "Carga y organización de registro a base de datos respectiva y documentos de respaldo",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "5 días"
+            },
+            {
+                "title": "Actualización de todas las bases de datos (Anual en noviembre)",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "30 días"
+            },
+            {
+                "title": "Reporte interno o síntesis periódica (Noviembre)",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            }
+        ]
+    },
+    "inv_7": {
+        "team": "investigacion",
+        "teamName": "Equipo Investigación",
+        "teamColor": "#942F16",
+        "teamLeads": "José León",
+        "title": "Coordinación de Proyectos (18 proyectos)",
+        "category": "Gestión de Proyectos",
+        "icon": "fa-diagram-project",
+        "microtasks": [
+            {
+                "title": "Comunicación de nuevo proyecto por parte de recaudación de fondos",
+                "resp": "Recaudación de fondos",
+                "time": "1 día"
+            },
+            {
+                "title": "Creación de proyecto en SI, SC y SP",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación / Coordinación Administrativa Financiera",
+                "time": "3 días"
+            },
+            {
+                "title": "Lanzamiento de proyecto",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Seguimiento técnico de avances y cumplimiento de actividades (4 reuniones/año)",
+                "resp": "Coordinación de Especies / Responsable técnico",
+                "time": "15 días"
+            },
+            {
+                "title": "Seguimiento administrativo y actualización en bases de datos de programas",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "20 días"
+            },
+            {
+                "title": "Elaboración de reporte técnico o narrativo",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "20 días"
+            },
+            {
+                "title": "Envío del reporte al donante, socio o dirección institucional",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            },
+            {
+                "title": "Archivo institucional del proyecto",
+                "resp": "Coordinador de Proyectos de Conservación e Investigación",
+                "time": "1 día"
+            }
+        ]
+    }
+};
+        const structuredPositions = {
+    "inv_1": {
+        "x": -1150,
+        "y": -500
+    },
+    "inv_2": {
+        "x": -1320,
+        "y": -280
+    },
+    "inv_3": {
+        "x": -980,
+        "y": -280
+    },
+    "inv_4": {
+        "x": -1150,
+        "y": -60
+    },
+    "inv_5": {
+        "x": -1320,
+        "y": 160
+    },
+    "inv_6": {
+        "x": -980,
+        "y": 160
+    },
+    "inv_7": {
+        "x": -1150,
+        "y": 380
+    },
+    "esp_2": {
+        "x": -450,
+        "y": -520
+    },
+    "esp_3": {
+        "x": -640,
+        "y": -320
+    },
+    "esp_4": {
+        "x": -450,
+        "y": -320
+    },
+    "esp_5": {
+        "x": -260,
+        "y": -320
+    },
+    "esp_6": {
+        "x": -640,
+        "y": -110
+    },
+    "esp_7": {
+        "x": -450,
+        "y": -110
+    },
+    "esp_8": {
+        "x": -260,
+        "y": -110
+    },
+    "esp_9": {
+        "x": -640,
+        "y": 100
+    },
+    "esp_1": {
+        "x": -260,
+        "y": 100
+    },
+    "esp_10": {
+        "x": -450,
+        "y": 360
+    },
+    "pai_1": {
+        "x": 240,
+        "y": -480
+    },
+    "pai_2": {
+        "x": 520,
+        "y": -480
+    },
+    "pai_6": {
+        "x": 520,
+        "y": -240
+    },
+    "pai_4": {
+        "x": 240,
+        "y": -20
+    },
+    "pai_3": {
+        "x": 520,
+        "y": -20
+    },
+    "pai_5": {
+        "x": 380,
+        "y": 260
+    },
+    "tec_1": {
+        "x": 1180,
+        "y": -540
+    },
+    "tec_2": {
+        "x": 940,
+        "y": -340
+    },
+    "tec_3": {
+        "x": 1180,
+        "y": -340
+    },
+    "tec_4": {
+        "x": 1420,
+        "y": -340
+    },
+    "tec_5": {
+        "x": 1420,
+        "y": -140
+    },
+    "tec_6": {
+        "x": 940,
+        "y": -140
+    },
+    "tec_7": {
+        "x": 1180,
+        "y": -140
+    },
+    "tec_8": {
+        "x": 1180,
+        "y": 60
+    },
+    "tec_9": {
+        "x": 940,
+        "y": 60
+    },
+    "tec_10": {
+        "x": 1420,
+        "y": 60
+    },
+    "tec_11": {
+        "x": 1180,
+        "y": 260
+    },
+    "tec_12": {
+        "x": 940,
+        "y": 480
+    },
+    "tec_14": {
+        "x": 1420,
+        "y": 480
+    },
+    "adm_1": {
+        "x": 1000,
+        "y": 380
+    },
+    "adm_2": {
+        "x": 1300,
+        "y": 380
+    }
+};
+
+        function getNodeBorderColor(team) {
+            switch(team) {
+                case 'tec': return '#015486';        // Imperial Blue Jocotoco
+                case 'administracion': return '#2A7B88'; // Deep Teal / Chocó Turquoise
+                case 'especies': return '#80973E';   // Peridot Jocotoco Green
+                case 'paisaje': return '#E7872B';    // Apricot Chocó-Tumbes
+                case 'investigacion': return '#942F16'; // Rooibos Tea Terracotta
+                default: return '#94a3b8';
+            }
+        }
+
+        function getTeamBadgeText(team) {
+            switch(team) {
+                case 'tec': return 'Tecnología';
+                case 'administracion': return 'Administración';
+                case 'especies': return 'Especies';
+                case 'paisaje': return 'Paisaje';
+                case 'investigacion': return 'Investigación';
+                default: return '';
+            }
+        }
+
+        // Armado de Nodos Vis.js con Colores de Marca
+        const rawNodes = Object.keys(allTasks).map(id => {
+            const task = allTasks[id];
+            const teamBadge = `[${getTeamBadgeText(task.team)}]`;
+            const wrappedTitle = task.title.match(/.{1,22}(\s|$)/g)?.join('\n') || task.title;
+            const label = `${teamBadge}\n${wrappedTitle}`;
+            const pos = structuredPositions[id] || { x: 0, y: 0 };
+
+            return {
+                id: id,
+                label: label,
+                team: task.team,
+                x: pos.x,
+                y: pos.y,
+                physics: false,
+                color: {
+                    background: '#012b48',
+                    border: getNodeBorderColor(task.team),
+                    highlight: {
+                        background: getNodeBorderColor(task.team),
+                        border: '#ffffff'
+                    },
+                    hover: {
+                        background: '#1e2f47',
+                        border: getNodeBorderColor(task.team)
+                    }
+                },
+                font: {
+                    color: '#ffffff',
+                    face: 'Inter',
+                    size: 13,
+                    bold: { color: '#ffffff', size: 13 },
+                    multi: true
+                },
+                borderWidth: 3,
+                shape: 'box',
+                margin: { top: 12, bottom: 12, left: 16, right: 16 },
+                shadow: false
+            };
+        });
+
+        const nodes = new vis.DataSet(rawNodes);
+
+        // Armado de Conexiones (Edges) con Colores Heredados (from -> to) y Descripciones
+        const rawEdges = [
+    {
+        "from": "tec_1",
+        "to": "tec_2",
+        "arrows": "to",
+        "label": "Datos acústicos ordenados se transfieren para análisis especializados",
+        "dashes": true
+    },
+    {
+        "from": "tec_1",
+        "to": "tec_3",
+        "arrows": "to",
+        "label": "Grabaciones respaldadas alimentan el pipeline de entrenamiento de modelos por especie"
+    },
+    {
+        "from": "tec_1",
+        "to": "tec_4",
+        "arrows": "to",
+        "label": "Dataset acústico consolidado pasa a inferencia de eventos generales"
+    },
+    {
+        "from": "tec_1",
+        "to": "tec_10",
+        "arrows": "to",
+        "label": "Detección de necesidades de automatización para desarrollo de herramientas",
+        "dashes": true
+    },
+    {
+        "from": "tec_6",
+        "to": "tec_7",
+        "arrows": "to",
+        "label": "Infraestructura GPU en Azure aprovisionada para empaquetado Docker"
+    },
+    {
+        "from": "tec_6",
+        "to": "tec_8",
+        "arrows": "to",
+        "label": "Servidores y almacenamiento en la nube conectados a la plataforma web HITL"
+    },
+    {
+        "from": "tec_3",
+        "to": "tec_7",
+        "arrows": "to",
+        "label": "Pesos y arquitectura del modelo PyTorch listos para dockerización"
+    },
+    {
+        "from": "tec_4",
+        "to": "tec_5",
+        "arrows": "to",
+        "label": "Detecciones de eventos generales retroalimentan el reentrenamiento"
+    },
+    {
+        "from": "tec_5",
+        "to": "tec_7",
+        "arrows": "to",
+        "label": "Modelo generalista reentrenado se empaqueta en contenedor productivo"
+    },
+    {
+        "from": "tec_7",
+        "to": "tec_8",
+        "arrows": "to",
+        "label": "Contenedores de inferencia se integran al backend de la plataforma HITL"
+    },
+    {
+        "from": "tec_8",
+        "to": "tec_9",
+        "arrows": "to;from",
+        "label": "Plataforma HITL y VA-Jocotoco estrechamente ligadas para validación y despliegue interactivo"
+    },
+    {
+        "from": "tec_11",
+        "to": "tec_9",
+        "arrows": "to",
+        "label": "Validadores biológicos reportan tickets de bugs y sugerencias de mejora a Christian en VA-Jocotoco",
+        "dashes": true
+    },
+    {
+        "from": "tec_8",
+        "to": "tec_11",
+        "arrows": "to",
+        "label": "Predicciones validadas por expertos en HITL pasan a reportes de BI y análisis biológicos"
+    },
+    {
+        "from": "tec_10",
+        "to": "tec_11",
+        "arrows": "to",
+        "label": "Herramientas de software automatizan generación de bases de datos",
+        "dashes": true
+    },
+    {
+        "from": "tec_11",
+        "to": "tec_14",
+        "arrows": "to",
+        "label": "Indicadores biológicos e índices de diversidad se sintetizan para congresos",
+        "dashes": true
+    },
+    {
+        "from": "tec_12",
+        "to": "tec_6",
+        "arrows": "to",
+        "label": "Grants y fondos de nube (Azure, AWS) financian infraestructura GPU y almacenamiento",
+        "dashes": true
+    },
+    {
+        "from": "adm_1",
+        "to": "tec_11",
+        "arrows": "to",
+        "label": "Gestión de contratos y pagos respalda las horas de validación y expertos biológicos",
+        "dashes": true
+    },
+    {
+        "from": "adm_2",
+        "to": "tec_11",
+        "arrows": "to",
+        "label": "Entregables de pasantes y consultores se integran a reportes institucionales",
+        "dashes": true
+    },
+    {
+        "from": "adm_1",
+        "to": "inv_2",
+        "arrows": "to;from",
+        "label": "Administración (Andrés) e Investigación (José León) gestionan y hacen seguimiento de permisos MAE y reservas",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "adm_1",
+        "to": "inv_3",
+        "arrows": "to",
+        "label": "Administración (Andrés) gestiona contratos y adendas articuladas con convenios de investigación",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "adm_2",
+        "to": "inv_4",
+        "arrows": "to;from",
+        "label": "Administración e Investigación canalizan pasantes y tesistas bajo acuerdos marco universitarios",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "adm_2",
+        "to": "inv_3",
+        "arrows": "to",
+        "label": "Consultorías y alianzas se formalizan bajo convenios institucionales",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "adm_1",
+        "to": "esp_1",
+        "arrows": "to",
+        "label": "Administración (Andrés) gestiona permisos MAE y autorizaciones en reservas para campañas de especies",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "adm_1",
+        "to": "pai_1",
+        "arrows": "to",
+        "label": "Administración (Andrés) gestiona permisos MAE requeridos para instalación de equipos en paisaje",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_3",
+        "arrows": "to",
+        "label": "Metodología y cronograma estandarizados guían el monitoreo de Colibrí Estrella"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_4",
+        "arrows": "to",
+        "label": "Diseño muestral define censos bienales de Matorralero Cabecipálido"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_5",
+        "arrows": "to",
+        "label": "Protocolos reproductivos se aplican a cajas nido de pericos amenazados"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_6",
+        "arrows": "to",
+        "label": "Diseño herpetológico en convenio con Parque Amaru guía la toma de datos de Lagartija Coliazul"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_7",
+        "arrows": "to",
+        "label": "Metodología de conteo simultáneo se distribuye para censos de Cóndor Andino"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_8",
+        "arrows": "to",
+        "label": "Calendario estacional activa el monitoreo de Aves Migratorias"
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_9",
+        "arrows": "to",
+        "label": "Protocolo de playa coordina patrullajes diarios de Tortugas Marinas"
+    },
+    {
+        "from": "esp_3",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Resultados de JocoApp fundamentan medidas de protección para Colibrí Estrella",
+        "dashes": true
+    },
+    {
+        "from": "esp_4",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Dinámica poblacional de Matorralero guía manejo de hábitat",
+        "dashes": true
+    },
+    {
+        "from": "esp_5",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Tasa de eclosión en cajas nido orienta la instalación de nuevos nidos artificiales",
+        "dashes": true
+    },
+    {
+        "from": "esp_6",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Registros de herpetofauna impulsan micro-reservas para Lagartija Coliazul",
+        "dashes": true
+    },
+    {
+        "from": "esp_7",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Censos de Cóndor Andino respaldan planes de manejo en páramos",
+        "dashes": true
+    },
+    {
+        "from": "esp_8",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Picos migratorios definen zonas de descanso protegidas",
+        "dashes": true
+    },
+    {
+        "from": "esp_9",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Éxito de eclosión fortalece protección de playas de anidación",
+        "dashes": true
+    },
+    {
+        "from": "esp_1",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Evidencia bioacústica de especies focales consolida acciones de conservación global"
+    },
+    {
+        "from": "pai_1",
+        "to": "pai_2",
+        "arrows": "to",
+        "label": "Estratificación de hábitats del paisaje guía el muestreo de especies focales",
+        "dashes": true
+    },
+    {
+        "from": "pai_2",
+        "to": "pai_6",
+        "arrows": "to",
+        "label": "Transectos de especies se sincronizan con puntos de monitoreo de Primates"
+    },
+    {
+        "from": "pai_4",
+        "to": "pai_3",
+        "arrows": "to",
+        "label": "Alertas y datos de patrullajes comunitarios retroalimentan el estudio de cacería"
+    },
+    {
+        "from": "pai_3",
+        "to": "pai_5",
+        "arrows": "to",
+        "label": "Mapeo de uso de fauna identifica áreas críticas para mitigación de conflictos",
+        "dashes": true
+    },
+    {
+        "from": "pai_4",
+        "to": "pai_5",
+        "arrows": "to",
+        "label": "Patrulleros reportan ataques de carnívoros para instalación rápida de disuasivos",
+        "dashes": true
+    },
+    {
+        "from": "pai_1",
+        "to": "pai_5",
+        "arrows": "to",
+        "label": "Registros de fototrampeo en paisaje identifican corredores de grandes carnívoros"
+    },
+    {
+        "from": "inv_1",
+        "to": "inv_2",
+        "arrows": "to",
+        "label": "Líneas de investigación de planes de acción requieren tramitación de permisos específicos"
+    },
+    {
+        "from": "inv_1",
+        "to": "inv_3",
+        "arrows": "to",
+        "label": "Metas de conservación de especies derivan en convenios con universidades e institutos"
+    },
+    {
+        "from": "inv_3",
+        "to": "inv_4",
+        "arrows": "to",
+        "label": "Convenios marco interinstitucionales habilitan la recepción de practicantes pre-profesionales"
+    },
+    {
+        "from": "inv_2",
+        "to": "inv_5",
+        "arrows": "to",
+        "label": "Permisos emitidos y resoluciones se archivan e indexan en base de datos de investigación"
+    },
+    {
+        "from": "inv_3",
+        "to": "inv_5",
+        "arrows": "to",
+        "label": "Contratos y convenios legalizados se catalogan formalmente en repositorio"
+    },
+    {
+        "from": "inv_6",
+        "to": "inv_5",
+        "arrows": "to",
+        "label": "Registros taxonómicos validados respaldan artículos científicos en la base de datos",
+        "dashes": true
+    },
+    {
+        "from": "inv_7",
+        "to": "inv_1",
+        "arrows": "to",
+        "label": "Proyectos institucionales financiados ejecutan actividades de los Planes de Acción",
+        "dashes": true
+    },
+    {
+        "from": "esp_1",
+        "to": "tec_1",
+        "arrows": "to",
+        "label": "Equipo Especies envía archivos crudos de audio y fototrampeo a Tecnología para respaldo",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "tec_11",
+        "to": "esp_1",
+        "arrows": "to",
+        "label": "Tecnología entrega paquetes validados por IA e informes biológicos al Equipo Especies",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "esp_2",
+        "to": "tec_2",
+        "arrows": "to;from",
+        "label": "Especies y Tecnología alinean conjuntamente preguntas ecológicas y modelos de ocupación",
+        "dashes": [
+            5,
+            5
+        ]
+    },
+    {
+        "from": "pai_1",
+        "to": "tec_1",
+        "arrows": "to",
+        "label": "Equipo Paisaje envía tarjetas de memoria y audios de paisaje a Pedro para procesamiento",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "tec_11",
+        "to": "pai_1",
+        "arrows": "to",
+        "label": "Tecnología genera bases de datos depuradas e informes acústicos por paisaje",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "tec_12",
+        "to": "inv_7",
+        "arrows": "to;from",
+        "label": "Grants y fondos tecnológicos (Azure, AWS) cofinancian y fortalecen proyectos de conservación",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "tec_11",
+        "to": "inv_6",
+        "arrows": "to",
+        "label": "Tecnología entrega bases de datos acústicas validadas (+50.000 registros) a Investigación",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "tec_14",
+        "to": "inv_5",
+        "arrows": "to",
+        "label": "Publicaciones y pósteres de conferencias de tecnología se archivan en el repositorio institucional",
+        "dashes": [
+            4,
+            4
+        ]
+    },
+    {
+        "from": "inv_2",
+        "to": "pai_1",
+        "arrows": "to",
+        "label": "Investigación tramita y entrega permisos oficiales del MAE requeridos para muestreo en paisaje",
+        "dashes": [
+            5,
+            5
+        ]
+    },
+    {
+        "from": "inv_2",
+        "to": "esp_1",
+        "arrows": "to",
+        "label": "Investigación gestiona autorizaciones institucionales y del MAE para campañas acústicas de especies",
+        "dashes": [
+            5,
+            5
+        ]
+    },
+    {
+        "from": "esp_10",
+        "to": "inv_1",
+        "arrows": "to",
+        "label": "Monitoreo continuo de especies aporta datos empíricos para actualización de Planes de Acción",
+        "dashes": [
+            6,
+            4
+        ]
+    },
+    {
+        "from": "pai_3",
+        "to": "inv_7",
+        "arrows": "to",
+        "label": "Estudios de cacería justifican reportes técnicos y entregables a donantes",
+        "dashes": [
+            5,
+            5
+        ]
+    },
+    {
+        "from": "inv_4",
+        "to": "pai_3",
+        "arrows": "to",
+        "label": "Practicantes y pasantes universitarios se asignan como apoyo en territorio para cacería y talleres",
+        "dashes": [
+            4,
+            4
+        ]
+    },
+    {
+        "from": "pai_2",
+        "to": "esp_2",
+        "arrows": "to;from",
+        "label": "Paisaje y Especies coordinan metodologías conjuntas de transectos para evitar duplicidad",
+        "dashes": [
+            5,
+            5
+        ]
+    },
+    {
+        "from": "pai_5",
+        "to": "esp_10",
+        "arrows": "to",
+        "label": "Medidas de mitigación en fincas protegen hábitats críticos de especies amenazadas",
+        "dashes": [
+            6,
+            4
+        ]
+    }
+].map(e => {
+            const fromTask = allTasks[e.from];
+            const toTask = allTasks[e.to];
+            const isInterTeam = fromTask && toTask && fromTask.team !== toTask.team;
+            
+            const fromColor = fromTask ? fromTask.teamColor : '#94a3b8';
+            const toColor = toTask ? toTask.teamColor : '#94a3b8';
+
+            return {
+                from: e.from,
+                to: e.to,
+                arrows: typeof e.arrows === 'string' ? {
+                    to: { enabled: e.arrows.includes('to'), scaleFactor: 1.15 },
+                    from: { enabled: e.arrows.includes('from'), scaleFactor: 1.15 }
+                } : (e.arrows || { to: { enabled: true, scaleFactor: 1.15 } }),
+                dashes: e.dashes || false,
+                title: (isInterTeam ? '⚡ Conexión Inter-Equipo: ' : '➜ Flujo Interno: ') + (e.label || ''),
+                color: isInterTeam ? {
+                    inherit: 'both'
+                } : {
+                    color: fromColor,
+                    highlight: '#ffffff',
+                    hover: '#ffffff',
+                    inherit: false
+                },
+                width: isInterTeam ? 3.5 : 2.2,
+                hoverWidth: 3,
+                selectionWidth: 4.5,
+                smooth: {
+                    type: 'continuous',
+                    forceDirection: 'none'
+                },
+                shadow: false
+            };
+        });
+
+        const edges = new vis.DataSet(rawEdges);
+
+        // ==========================================
+        // INICIALIZACIÓN DE LA RED VIS.JS (SIN FÍSICA)
+        // ==========================================
+        const container = document.getElementById('mynetwork');
+        const data = { nodes: nodes, edges: edges };
+        
+        const options = {
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                zoomView: true,
+                dragView: true,
+                selectable: true,
+                multiselect: false,
+                hideEdgesOnDrag: true
+            },
+            physics: {
+                enabled: false
+            },
+            nodes: {
+                shadow: false
+            }
+        };
+
+        const network = new vis.Network(container, data, options);
+
+        // ==========================================
+        // ESTADO GLOBAL: ASIGNADO ACTIVO, TEMA Y FILTROS
+        // ==========================================
+        let activePerson = null;
+        let activeTeam = 'all';
+        let currentTheme = 'dark';
+        let currentSelectedNodeId = null;
+        let isPanelMinimized = false;
+
+        // Minimizar / Expandir panel de control
+        function toggleMinimizePanel() {
+            isPanelMinimized = !isPanelMinimized;
+            const panel = document.getElementById('control-panel');
+            const icon = document.getElementById('icon-minimize');
+            const content = document.getElementById('panel-expandable-content');
+            if (isPanelMinimized) {
+                panel.classList.add('minimized');
+                panel.style.maxWidth = '360px';
+                content.style.display = 'none';
+                icon.className = 'fa-solid fa-chevron-down';
+            } else {
+                panel.classList.remove('minimized');
+                panel.style.maxWidth = '42rem';
+                content.style.display = 'block';
+                icon.className = 'fa-solid fa-chevron-up';
+            }
+        }
+
+        // Sistema de Temas (Dark / Sepia / Light) con actualización dinámica de nodos Canvas
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.body.className = `theme-${theme}`;
+
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            const activeThemeBtn = document.getElementById(`btn-theme-${theme}`);
+            if (activeThemeBtn) activeThemeBtn.classList.add('active');
+
+            try {
+                localStorage.setItem('jocotoco_theme', theme);
+            } catch(e) {}
+
+            refreshVisualNodes();
+            if (document.getElementById('side-panel').classList.contains('open') && currentSelectedNodeId) {
+                openPanel(currentSelectedNodeId);
+            }
+        }
+
+        // Normalización de texto y concordancia de personas / alias
+        function normalizeStr(s) {
+            return s ? s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim() : "";
+        }
+
+        function matchPersonNames(searchPerson, respText) {
+            if (!searchPerson || !respText) return false;
+            const s = normalizeStr(searchPerson);
+            const r = normalizeStr(respText);
+            
+            if (r.includes(s)) return true;
+
+            // Concordancia específica por alias institucionales
+            if (s.includes('andres') && r.includes('andres')) return true;
+            if ((s.includes('pato mena') || s.includes('patricio mena')) && (r.includes('pato mena') || r.includes('patricio mena') || (r.includes('patricio') && !r.includes('macas')))) return true;
+            if ((s.includes('pato macas') || s.includes('patricio macas')) && (r.includes('pato macas') || r.includes('patricio macas') || r.includes('macas'))) return true;
+            if ((s.includes('gaby') || s.includes('gabi')) && (r.includes('gaby') || r.includes('gabi'))) return true;
+            if ((s.includes('jose') || s.includes('leon')) && (r.includes('jose') || r.includes('leon'))) return true;
+            if (s.includes('liz') && r.includes('liz')) return true;
+            if (s.includes('pedro') && r.includes('pedro')) return true;
+            if (s.includes('christian') && (r.includes('christian') || r.includes('christia'))) return true;
+            if (s.includes('guardaparque') && r.includes('guardaparque')) return true;
+            if (s.includes('monitor') && r.includes('monitor')) return true;
+            if (s.includes('experto') && r.includes('experto')) return true;
+
+            return false;
+        }
+
+        // Verificación rigurosa de persona asignada a nivel de microtarea
+        function isPersonAssignedToTask(person, task) {
+            if (!person || !task) return false;
+            return task.microtasks.some(m => m.resp && matchPersonNames(person, m.resp));
+        }
+
+        function isPersonAssignedToMicro(person, micro) {
+            if (!person || !micro || !micro.resp) return false;
+            return matchPersonNames(person, micro.resp);
+        }
+
+        // ==========================================
+        // CÁLCULO DE VECINDAD DE 2 NIVELES (DEPENDENCIAS)
+        // ==========================================
+        function getTwoHopNeighborhood(startNodeId) {
+            const pred1 = new Set();
+            const succ1 = new Set();
+            const pred2 = new Set();
+            const succ2 = new Set();
+
+            // Nivel 1: Aristas directas
+            rawEdges.forEach(e => {
+                if (e.to === startNodeId) pred1.add(e.from);
+                if (e.from === startNodeId) succ1.add(e.to);
+            });
+
+            // Nivel 2: Predecesores de predecesores
+            pred1.forEach(p1 => {
+                rawEdges.forEach(e => {
+                    if (e.to === p1 && e.from !== startNodeId && !pred1.has(e.from)) {
+                        pred2.add(e.from);
+                    }
+                });
+            });
+
+            // Nivel 2: Sucesores de sucesores
+            succ1.forEach(s1 => {
+                rawEdges.forEach(e => {
+                    if (e.from === s1 && e.to !== startNodeId && !succ1.has(e.to)) {
+                        succ2.add(e.to);
+                    }
+                });
+            });
+
+            return {
+                pred1: Array.from(pred1),
+                pred2: Array.from(pred2),
+                succ1: Array.from(succ1),
+                succ2: Array.from(succ2),
+                allNeighbors: new Set([...pred1, ...pred2, ...succ1, ...succ2, startNodeId])
+            };
+        }
+
+        // ==========================================
+        // MANEJO DEL PANEL LATERAL
+        // ==========================================
+        const sidePanel = document.getElementById('side-panel');
+
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                openPanel(nodeId);
+            } else if (params.edges.length > 0) {
+                // Clic en arista: abrir el nodo origen
+                const edgeId = params.edges[0];
+                const edgeData = edges.get(edgeId);
+                if (edgeData) {
+                    openPanel(edgeData.from);
+                }
+            } else {
+                closePanel();
+            }
+        });
+
+        network.on("hoverNode", function () { network.canvas.body.container.style.cursor = 'pointer'; });
+        network.on("blurNode", function () { network.canvas.body.container.style.cursor = 'default'; });
+
+        function openPanel(id) {
+            const task = allTasks[id];
+            if (!task) return;
+
+            currentSelectedNodeId = id;
+
+            // Encabezado del Panel
+            document.getElementById('panel-title').innerText = task.title;
+            document.getElementById('panel-category').innerText = task.category;
+            document.getElementById('panel-team-badge').innerText = task.teamName;
+            document.getElementById('panel-team-leads').innerText = `Líderes: ${task.teamLeads}`;
+            
+            const badge = document.getElementById('panel-team-badge');
+            badge.style.backgroundColor = `${task.teamColor}20`;
+            badge.style.color = task.teamColor;
+            badge.style.borderColor = `${task.teamColor}40`;
+
+            const iconContainer = document.getElementById('panel-icon-container');
+            iconContainer.style.backgroundColor = task.teamColor;
+            document.getElementById('panel-icon').className = `fa-solid ${task.icon}`;
+            
+            document.getElementById('panel-count').innerText = task.microtasks.length;
+
+            // Renderizar Vecindad de Impacto de 2 Niveles
+            const neighborhood = getTwoHopNeighborhood(id);
+            
+            // Predecesores
+            const predContainer = document.getElementById('panel-predecessors-list');
+            predContainer.innerHTML = '';
+            if (neighborhood.pred1.length === 0 && neighborhood.pred2.length === 0) {
+                predContainer.innerHTML = '<span class="opacity-50 italic text-[10px]">Inicio de flujo (Sin predecesores)</span>';
+            } else {
+                neighborhood.pred1.forEach(pId => renderDepButton(pId, predContainer, 'Nivel 1 Directo', '#E7872B'));
+                neighborhood.pred2.forEach(pId => renderDepButton(pId, predContainer, 'Nivel 2 Indirecto', '#94a3b8'));
+            }
+
+            // Sucesores
+            const succContainer = document.getElementById('panel-successors-list');
+            succContainer.innerHTML = '';
+            if (neighborhood.succ1.length === 0 && neighborhood.succ2.length === 0) {
+                succContainer.innerHTML = '<span class="opacity-50 italic text-[10px]">Punto final de flujo</span>';
+            } else {
+                neighborhood.succ1.forEach(sId => renderDepButton(sId, succContainer, 'Nivel 1 Directo', '#80973E'));
+                neighborhood.succ2.forEach(sId => renderDepButton(sId, succContainer, 'Nivel 2 Indirecto', '#94a3b8'));
+            }
+
+            // Banner de persona activa en panel
+            const personBanner = document.getElementById('panel-person-filter-banner');
+            if (activePerson) {
+                personBanner.classList.remove('hidden');
+                document.getElementById('panel-active-person-name').innerText = activePerson;
+            } else {
+                personBanner.classList.add('hidden');
+            }
+
+            // Renderizar Lista Dinámica de Microtareas
+            const list = document.getElementById('microtasks-list');
+            list.innerHTML = '';
+            
+            task.microtasks.forEach((micro, index) => {
+                const isAssignedToActive = activePerson ? isPersonAssignedToMicro(activePerson, micro) : false;
+                const li = document.createElement('li');
+                
+                let cardClass = 'micro-card rounded-xl p-3 border hover:border-indigo-400/60 transition-all shadow-sm';
+                if (activePerson) {
+                    if (isAssignedToActive) {
+                        cardClass = 'rounded-xl p-3 border-2 border-[#E7872B] bg-[#E7872B]/15 shadow-md ring-2 ring-[#E7872B]/40 transition-all';
+                    } else {
+                        cardClass = 'micro-card rounded-xl p-3 border opacity-40 hover:opacity-90 transition-all';
+                    }
+                }
+                li.className = cardClass;
+                
+                const detailHtml = micro.detail 
+                    ? `<p class="micro-card-detail text-xs mt-2 leading-relaxed p-2.5 rounded-lg border shadow-inner">${micro.detail}</p>` 
+                    : '';
+
+                const assignedBadgeHtml = isAssignedToActive 
+                    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[#E7872B] text-white text-[10px] font-bold rounded-full shadow-sm mb-1.5"><i class="fa-solid fa-star text-[9px]"></i> Asignado a ${activePerson}</span>` 
+                    : '';
+
+                // Botones interactivos para cada persona en el campo responsable
+                const respParts = micro.resp.split(/[\/,]/).map(s => s.trim()).filter(Boolean);
+                const respButtonsHtml = respParts.map(r => {
+                    const isMatches = activePerson && r.toLowerCase().includes(activePerson.toLowerCase());
+                    return `<button type="button" onclick="event.stopPropagation(); filterPerson('${r}')" title="Filtrar por ${r}" 
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded-md font-semibold border transition hover:scale-105 cursor-pointer ${
+                            isMatches 
+                                ? 'bg-[#E7872B] text-white border-[#E7872B] shadow-sm' 
+                                : 'bg-[#015486]/10 text-[#015486] border-[#015486]/25 hover:bg-[#015486]/20'
+                        }">
+                        <i class="fa-regular fa-user text-[10px]"></i> ${r}
+                    </button>`;
+                }).join(' ');
+
+                li.innerHTML = `
+                    ${assignedBadgeHtml}
+                    <div class="flex items-start gap-2.5 mb-1.5">
+                        <span class="text-xs font-bold text-white bg-slate-800 rounded-lg w-5 h-5 flex items-center justify-center shrink-0 mt-0.5">${index + 1}</span>
+                        <div class="flex-1 w-full">
+                            <p class="text-sm font-bold leading-tight">${micro.title}</p>
+                            ${detailHtml}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-700/20 flex-wrap">
+                        <div class="flex flex-wrap gap-1 items-center">
+                            ${respButtonsHtml}
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 bg-[#80973E]/10 text-[#80973E] text-[11px] rounded-md font-semibold border border-[#80973E]/20" title="Tiempo estimado">
+                            <i class="fa-regular fa-clock text-[10px]"></i> ${micro.time}
+                        </span>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+
+            sidePanel.classList.add('open');
+            highlightNeighborhood(id, neighborhood);
+        }
+
+        function renderDepButton(nodeId, containerEl, levelLabel, levelColor) {
+            const t = allTasks[nodeId];
+            if (!t) return;
+            const btn = document.createElement('button');
+            btn.className = 'dep-card px-2 py-1 rounded-md text-[10px] font-semibold flex items-center gap-1 cursor-pointer transition hover:scale-105 border';
+            btn.style.borderLeft = `3px solid ${levelColor}`;
+            btn.title = `${levelLabel}: ${t.title} (${t.teamName})`;
+            btn.innerHTML = `<span class="opacity-70">${levelLabel.includes('Nivel 1') ? '1°' : '2°'}</span> <span class="font-bold">${t.title.substring(0, 20)}...</span>`;
+            btn.onclick = () => {
+                network.selectNodes([nodeId]);
+                openPanel(nodeId);
+                network.focus(nodeId, { scale: 1.1, animation: true });
+            };
+            containerEl.appendChild(btn);
+        }
+
+        function closePanel() {
+            sidePanel.classList.remove('open');
+            currentSelectedNodeId = null;
+            refreshVisualNodes();
+            network.unselectAll();
+        }
+
+        // Resaltar nodo seleccionado y su vecindad de 2 niveles
+        function highlightNeighborhood(selectedId, neighborhood) {
+            const isDark = currentTheme === 'dark';
+            const isSepia = currentTheme === 'sepia';
+
+            const defaultNodeBg = isDark ? '#012b48' : (isSepia ? '#fbf7ee' : '#ffffff');
+            const defaultNodeText = isDark ? '#ffffff' : (isSepia ? '#3d2b19' : '#0f172a');
+            
+            const dimmedNodeBg = isDark ? '#011624' : (isSepia ? '#ece1d2' : '#f1f5f9');
+            const dimmedNodeBorder = isDark ? '#013251' : (isSepia ? '#d5c2ae' : '#cbd5e1');
+            const dimmedNodeText = isDark ? '#475569' : (isSepia ? '#a3917e' : '#94a3b8');
+
+            const batch = [];
+            nodes.forEach(node => {
+                const task = allTasks[node.id];
+                if (!task) return;
+
+                if (node.id === selectedId) {
+                    batch.push({
+                        id: node.id,
+                        borderWidth: 5,
+                        color: { background: task.teamColor, border: '#ffffff' },
+                        font: { color: '#ffffff', bold: { color: '#ffffff' } },
+                        shadow: false
+                    });
+                } else if (neighborhood.pred1.includes(node.id) || neighborhood.succ1.includes(node.id)) {
+                    batch.push({
+                        id: node.id,
+                        borderWidth: 3,
+                        color: { background: defaultNodeBg, border: task.teamColor },
+                        font: { color: defaultNodeText, bold: { color: defaultNodeText } },
+                        shadow: false
+                    });
+                } else if (neighborhood.pred2.includes(node.id) || neighborhood.succ2.includes(node.id)) {
+                    batch.push({
+                        id: node.id,
+                        borderWidth: 2,
+                        color: { background: defaultNodeBg, border: '#94a3b8' },
+                        font: { color: defaultNodeText, bold: { color: defaultNodeText } },
+                        shadow: false
+                    });
+                } else {
+                    batch.push({
+                        id: node.id,
+                        borderWidth: 1,
+                        color: { background: dimmedNodeBg, border: dimmedNodeBorder },
+                        font: { color: dimmedNodeText, bold: { color: dimmedNodeText } },
+                        shadow: false
+                    });
+                }
+            });
+            nodes.update(batch);
+        }
+        // ==========================================
+        // FILTRO RIGUROSO POR INTEGRANTE / ASIGNADO
+        // ==========================================
+        function filterPerson(personName) {
+            if (activePerson === personName) {
+                clearPersonFilter();
+                return;
+            }
+
+            activePerson = personName;
+
+            document.querySelectorAll('.person-chip').forEach(btn => {
+                if (btn.getAttribute('data-person') === personName) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            const activeTag = document.getElementById('active-person-tag');
+            activeTag.classList.remove('hidden');
+            document.getElementById('active-person-name').innerText = personName;
+
+            refreshVisualNodes();
+
+            if (sidePanel.classList.contains('open') && currentSelectedNodeId) {
+                openPanel(currentSelectedNodeId);
+            }
+        }
+
+        function clearPersonFilter() {
+            activePerson = null;
+            document.querySelectorAll('.person-chip').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('active-person-tag').classList.add('hidden');
+
+            refreshVisualNodes();
+
+            if (sidePanel.classList.contains('open') && currentSelectedNodeId) {
+                openPanel(currentSelectedNodeId);
+            }
+        }
+
+
+        function refreshVisualNodes() {
+            const isDark = currentTheme === 'dark';
+            const isSepia = currentTheme === 'sepia';
+
+            const defaultNodeBg = isDark ? '#012b48' : (isSepia ? '#fbf7ee' : '#ffffff');
+            const defaultNodeText = isDark ? '#ffffff' : (isSepia ? '#3d2b19' : '#0f172a');
+            
+            const dimmedNodeBg = isDark ? '#011624' : (isSepia ? '#ece1d2' : '#f1f5f9');
+            const dimmedNodeBorder = isDark ? '#013251' : (isSepia ? '#d5c2ae' : '#cbd5e1');
+            const dimmedNodeText = isDark ? '#475569' : (isSepia ? '#a3917e' : '#94a3b8');
+
+            const batch = [];
+            nodes.forEach(node => {
+                const task = allTasks[node.id];
+                if (!task) return;
+
+                const matchTeam = (activeTeam === 'all' || node.team === activeTeam);
+                const isSelected = (node.id === currentSelectedNodeId);
+
+                if (!matchTeam) {
+                    batch.push({ id: node.id, hidden: true });
+                    return;
+                }
+
+                if (activePerson) {
+                    const hasPerson = isPersonAssignedToTask(activePerson, task);
+                    if (hasPerson) {
+                        batch.push({
+                            id: node.id, hidden: false,
+                            borderWidth: 4,
+                            color: {
+                                background: isSelected ? task.teamColor : defaultNodeBg,
+                                border: '#E7872B',
+                                highlight: { background: task.teamColor, border: '#ffffff' }
+                            },
+                            font: { color: isSelected ? '#ffffff' : defaultNodeText, bold: { color: isSelected ? '#ffffff' : defaultNodeText } },
+                            shadow: false
+                        });
+                    } else {
+                        batch.push({
+                            id: node.id, hidden: false,
+                            borderWidth: 1,
+                            color: { background: dimmedNodeBg, border: dimmedNodeBorder },
+                            font: { color: dimmedNodeText, bold: { color: dimmedNodeText } },
+                            shadow: false
+                        });
+                    }
+                } else {
+                    batch.push({
+                        id: node.id, hidden: false,
+                        borderWidth: 3,
+                        color: {
+                            background: isSelected ? task.teamColor : defaultNodeBg,
+                            border: getNodeBorderColor(task.team),
+                            highlight: { background: task.teamColor, border: '#ffffff' }
+                        },
+                        font: { color: isSelected ? '#ffffff' : defaultNodeText, bold: { color: isSelected ? '#ffffff' : defaultNodeText } },
+                        shadow: false
+                    });
+                }
+            });
+            nodes.update(batch);
+        }
+
+        // ==========================================
+        // FILTROS POR EQUIPO
+        // ==========================================
+        function filterTeam(teamName) {
+            activeTeam = teamName;
+            document.querySelectorAll('.team-btn').forEach(btn => btn.classList.remove('active', 'bg-slate-700'));
+            const activeBtn = document.getElementById(`btn-team-${teamName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-slate-700');
+            }
+
+            refreshVisualNodes();
+            network.fit({ animation: true });
+        }
+
+        // ==========================================
+        // BUSCADOR EN TIEMPO REAL
+        // ==========================================
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                refreshVisualNodes();
+                return;
+            }
+
+            const matchingNodeIds = new Set();
+            Object.keys(allTasks).forEach(id => {
+                const task = allTasks[id];
+                const matchTitle = task.title.toLowerCase().includes(query);
+                const matchCat = task.category.toLowerCase().includes(query);
+                const matchLeads = task.teamLeads.toLowerCase().includes(query);
+                const matchMicro = task.microtasks.some(m => 
+                    m.title.toLowerCase().includes(query) || 
+                    (m.detail && m.detail.toLowerCase().includes(query)) ||
+                    (m.resp && m.resp.toLowerCase().includes(query))
+                );
+
+                if (matchTitle || matchCat || matchLeads || matchMicro) {
+                    matchingNodeIds.add(id);
+                }
+            });
+
+            nodes.forEach(node => {
+                nodes.update({
+                    id: node.id,
+                    hidden: !matchingNodeIds.has(node.id)
+                });
+            });
+
+            if (matchingNodeIds.size > 0) {
+                network.fit({
+                    nodes: Array.from(matchingNodeIds),
+                    animation: true
+                });
+            }
+        });
+
+        // Controles de zoom
+        function zoomIn() { network.moveTo({ scale: network.getScale() * 1.25, animation: true }); }
+        function zoomOut() { network.moveTo({ scale: network.getScale() * 0.8, animation: true }); }
+
+        // Restablecer cuadrícula organizada
+        function resetPositions() {
+            nodes.forEach(node => {
+                const pos = structuredPositions[node.id];
+                if (pos) {
+                    nodes.update({
+                        id: node.id,
+                        x: pos.x,
+                        y: pos.y
+                    });
+                }
+            });
+            clearPersonFilter();
+            filterTeam('all');
+            network.fit({ animation: true });
+        }
+
+        // Carga inicial del tema guardado
+        try {
+            const savedTheme = localStorage.getItem('jocotoco_theme');
+            if (savedTheme && ['dark', 'sepia', 'light'].includes(savedTheme)) {
+                setTheme(savedTheme);
+            }
+        } catch(e) {}
+    </script>
+</body>
+</html>
