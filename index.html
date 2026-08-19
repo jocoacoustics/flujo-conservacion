@@ -388,10 +388,10 @@
                         <div class="mt-3 flex flex-wrap gap-1.5 items-center">
                             <span class="text-[11px] font-semibold opacity-70 mr-1">Equipo:</span>
                             <button onclick="filterTeam('all')" id="btn-team-all" class="team-btn active px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-700 text-white border border-slate-600">
-                                Todos (38)
+                                Todos (42)
                             </button>
                             <button onclick="filterTeam('tec')" id="btn-team-tec" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#38bdf8] border border-[#015486]/50 hover:bg-[#015486]/30">
-                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#015486] mr-1.5"></span>Tecnología (12)
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#015486] mr-1.5"></span>Tecnología (13)
                             </button>
                             <button onclick="filterTeam('administracion')" id="btn-team-administracion" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#5eead4] border border-[#2A7B88]/50 hover:bg-[#2A7B88]/30">
                                 <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#2A7B88] mr-1.5"></span>Administración (2)
@@ -400,7 +400,7 @@
                                 <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#80973E] mr-1.5"></span>Especies (10)
                             </button>
                             <button onclick="filterTeam('paisaje')" id="btn-team-paisaje" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#fdba74] border border-[#E7872B]/50 hover:bg-[#E7872B]/30">
-                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#E7872B] mr-1.5"></span>Paisaje (6)
+                                <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#E7872B] mr-1.5"></span>Paisaje (10)
                             </button>
                             <button onclick="filterTeam('investigacion')" id="btn-team-investigacion" class="team-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/80 text-[#fca5a5] border border-[#942F16]/50 hover:bg-[#942F16]/30">
                                 <span class="w-2.5 h-2.5 inline-block rounded-full bg-[#942F16] mr-1.5"></span>Investigación (7)
@@ -419,10 +419,12 @@
                                 </div>
                             </div>
                             <div class="flex flex-wrap gap-1" id="person-chips-container">
-                                <!-- Tecnología -->
-                                <button onclick="filterPerson('Pedro')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Pedro">Pedro</button>
+                                <!-- Tecnología & Coordinación -->
+                                <button onclick="filterPerson('Pedro')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Pedro" title="Pedro (Coordinación de Tecnología, IA y Ciencia)">Pedro (Coord. Tecnología)</button>
                                 <button onclick="filterPerson('Christian')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Christian">Christian</button>
-                                <button onclick="filterPerson('Andrés')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#015486]/25 text-blue-200 border border-[#015486]/60" data-person="Andrés">Andrés</button>
+                                
+                                <!-- Administración & Permisos -->
+                                <button onclick="filterPerson('Andrés')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#2A7B88]/25 text-teal-200 border border-[#2A7B88]/60" data-person="Andrés" title="Andrés (Administración de Conservación / Permisos MAE)">Andrés (Admin / Permisos)</button>
                                 
                                 <!-- Especies -->
                                 <button onclick="filterPerson('Patricio Mena')" class="person-chip px-2 py-0.5 rounded text-[11px] font-medium bg-[#80973E]/25 text-green-200 border border-[#80973E]/60" data-person="Patricio Mena">Pato Mena</button>
@@ -443,12 +445,26 @@
                             </div>
                         </div>
 
-                        <!-- Leyenda de Conexiones Institucionales (Oración explicativa) -->
-                        <div class="mt-3 pt-2.5 border-t border-slate-700/50 text-[11px] opacity-85 leading-relaxed">
-                            <p class="mb-1 text-slate-300">
-                                <i class="fa-solid fa-circle-info text-[#80973E] mr-1"></i>
-                                <b>Lógica de Sinergia:</b> Las flechas continuas representan el flujo metodológico interno de cada equipo, y las líneas punteadas representan los traspasos de datos, permisos y validaciones entre equipos.
-                            </p>
+                        <!-- Leyenda Visual Explicativa de Tipos de Conexión -->
+                        <div class="mt-3 pt-2.5 border-t border-slate-700/50 text-[11px] leading-relaxed">
+                            <div class="font-bold text-slate-200 mb-1.5 flex items-center gap-1.5">
+                                <i class="fa-solid fa-diagram-project text-[#80973E]"></i>
+                                <span>Tipos de Conexión en el Grafo:</span>
+                            </div>
+                            <div class="grid grid-cols-1 gap-1.5 text-[10.5px]">
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="inline-block w-6 h-[3px] bg-sky-400 rounded-full shrink-0"></span>
+                                    <span><b>Línea Sólida (Continua):</b> Flujo secuencial directo de datos, entregables y metodologías de campo.</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="inline-block w-6 border-t-2 border-dashed border-amber-400 shrink-0"></span>
+                                    <span><b>Línea Entrecortada (Discontinua):</b> Coordinación transversal, permisos MAE, soporte legal y convenios.</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-300">
+                                    <span class="inline-block w-6 h-[3px] bg-gradient-to-r from-[#015486] via-[#80973E] to-[#E7872B] rounded-full shrink-0"></span>
+                                    <span><b>Degradado Bicolor:</b> Sinergia e interoperabilidad directa entre equipos distintos.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1452,43 +1468,112 @@
             }
         ]
     },
+    "pai_0": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "1. Diseño de Muestreo de Paisaje",
+        "category": "Diseño Metodológico",
+        "icon": "fa-compass-drafting",
+        "microtasks": [
+            {
+                "title": "Diseño de muestreo general del paisaje",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "2 días"
+            }
+        ]
+    },
+    "pai_6": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "1.1 Monitoreo de Primates (Balsas, Buenaventura)",
+        "category": "Monitoreo Paisaje",
+        "icon": "fa-monkey",
+        "microtasks": [
+            {
+                "title": "Reuniones de coordinación en reservas",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "3 días"
+            },
+            {
+                "title": "Organización de logística y trabajo en campo (sujeto a clima y seguridad)",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "17 días"
+            },
+            {
+                "title": "Extracción y procesamiento de información",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "2 días"
+            },
+            {
+                "title": "Análisis de datos e informe",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "5 días"
+            }
+        ]
+    },
+    "pai_coord": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "1.2 Coordinación y Solicitud de Permisos MAE",
+        "category": "Gestión Institucional",
+        "icon": "fa-file-signature",
+        "microtasks": [
+            {
+                "title": "Reuniones de coordinación y solicitud de permisos (ingreso de solicitud MAE)",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "7 días"
+            }
+        ]
+    },
+    "pai_val": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "1.2.1 Validación de Puntos de Muestreo",
+        "category": "Fase de Campo",
+        "icon": "fa-location-crosshairs",
+        "microtasks": [
+            {
+                "title": "Validación de puntos de muestreo en campo",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "3 días"
+            }
+        ]
+    },
     "pai_1": {
         "team": "paisaje",
         "teamName": "Equipo Paisaje",
         "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Muestreo Paisajes (Cámaras y Acústica)",
-        "category": "Monitoreo Ecológico",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "1.2.1.1 Muestreo Paisajes (Cámaras y Audios)",
+        "category": "Monitoreo Paisaje",
         "icon": "fa-map-location-dot",
         "microtasks": [
             {
-                "title": "Diseño de muestreo",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "2 días"
-            },
-            {
-                "title": "Reuniones de coordinación y solicitud de permisos (ingreso de solicitud MAE)",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "7 días"
-            },
-            {
-                "title": "Validación de puntos de muestreo (campo)",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "3 días"
-            },
-            {
-                "title": "Preparación de equipos, y logística (Instalación, permanencia de equipos y retiro)",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Preparación de equipos, y logística (Instalación, permanencia y retiro)",
+                "resp": "Jaime, Pato Macas, Gabi",
                 "time": "255 días"
             },
             {
-                "title": "Extracción, respaldo y procesamiento de información (Cámaras trampa). Los archivos de audio se envían a Pedro",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Extracción, respaldo y procesamiento de información (Cámaras trampa)",
+                "resp": "Jaime, Pato Macas, Gabi",
                 "time": "30 días"
             },
             {
+                "title": "Extracción, respaldo y procesamiento de información (Audios)",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "60 días"
+            },
+            {
                 "title": "Análisis de datos e informe",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "resp": "Jaime, Pato Macas, Gabi",
                 "time": "5 días"
             }
         ]
@@ -1497,45 +1582,87 @@
         "team": "paisaje",
         "teamName": "Equipo Paisaje",
         "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Muestreo de Especies Focalizadas (Paisaje)",
-        "category": "Monitoreo Ecológico",
+        "teamLeads": "Jaime, Gabi",
+        "title": "1.2.1.2 Muestreo de Especies (Paisaje)",
+        "category": "Monitoreo Paisaje",
         "icon": "fa-frog",
         "microtasks": [
             {
-                "title": "Diseño de muestreo",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "2 días"
-            },
-            {
-                "title": "Reuniones de coordinación y solicitud de permisos (ingreso de solicitud MAE)",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "7 días"
-            },
-            {
-                "title": "Validación de puntos en campo",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "3 días"
-            },
-            {
-                "title": "Preparación, instalación y permanencia de equipos",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Preparación, instalación y permanencia de equipos (campo)",
+                "resp": "Jaime, Gabi",
                 "time": "140 días"
             },
             {
                 "title": "Extracción, respaldo y procesamiento de información",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "resp": "Jaime, Gabi",
                 "time": "30 días"
             },
             {
-                "title": "Identificación de individuos mediante uso de IA",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Identificación de individuos de cámaras trampa (IA y validación humana)",
+                "resp": "Jaime, Gabi",
                 "time": "15 días"
             },
             {
                 "title": "Análisis de datos e informe",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "resp": "Jaime, Gabi",
                 "time": "5 días"
+            }
+        ]
+    },
+    "pai_acciones": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "2. Acciones de Conservación Territorial",
+        "category": "Conservación Territorial",
+        "icon": "fa-seedling",
+        "microtasks": [
+            {
+                "title": "Planificación y coordinación operativa de acciones de conservación en territorio",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "Continuo"
+            }
+        ]
+    },
+    "pai_5": {
+        "team": "paisaje",
+        "teamName": "Equipo Paisaje",
+        "teamColor": "#E7872B",
+        "teamLeads": "Jaime, Pato Macas, Gabi",
+        "title": "2.1 Interacciones Gente - Fauna Silvestre (Mitigación)",
+        "category": "Relacionamiento & Mitigación",
+        "icon": "fa-house-chimney-crack",
+        "microtasks": [
+            {
+                "title": "Levantamiento de información mediante encuestas (Relacionamiento Comunitario / Conservación)",
+                "resp": "Relacionamiento Comunitario, Jaime, Pato Macas, Gabi",
+                "time": "Depende de Relacionamiento Territorial"
+            },
+            {
+                "title": "Compra de equipos. Obtención de disuasivos olor, sonido y cercas eléctricas",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "2 días"
+            },
+            {
+                "title": "Evaluación de riesgo en fincas",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "40 días"
+            },
+            {
+                "title": "Entrega de disuasivos (Relacionamiento comunitario)",
+                "resp": "Relacionamiento Comunitario, Jaime, Pato Macas, Gabi",
+                "time": "Depende de Relacionamiento Territorial"
+            },
+            {
+                "title": "Reuniones de seguimiento",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "30 días"
+            },
+            {
+                "title": "Análisis de información e informe semestral",
+                "resp": "Jaime, Pato Macas, Gabi",
+                "time": "6 días"
             }
         ]
     },
@@ -1543,44 +1670,44 @@
         "team": "paisaje",
         "teamName": "Equipo Paisaje",
         "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Estudio de Cacería",
-        "category": "Monitoreo Comunitario",
+        "teamLeads": "Jaime, Pato Macas",
+        "title": "2.2 Prevención de Cacería",
+        "category": "Prevención & Monitoreo Comunitario",
         "icon": "fa-people-group",
         "microtasks": [
             {
-                "title": "Socialización, consentimiento informado, selección de monitores y familias validación de instrumentos",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Socialización, firma de consentimiento informado, selección de monitores y familias para diagnóstico de prevención",
+                "resp": "Jaime, Pato Macas",
                 "time": "30 días"
             },
             {
-                "title": "Capacitación de monitores y familias",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Capacitación de monitores y familias en registro de amenazas y prevención de cacería",
+                "resp": "Jaime, Pato Macas",
                 "time": "30 días"
             },
             {
-                "title": "Familias: autorregistro continuo de cacería. Revisión mensual y consolidación de base de datos",
-                "resp": "Familias locales, Patricio Macas, Jaime, Gaby",
+                "title": "Familias: autorregistro comunitario de presiones/uso de fauna para mitigación de cacería (Revisión mensual)",
+                "resp": "Familias locales, Jaime, Pato Macas",
                 "time": "12 días"
             },
             {
-                "title": "Monitores: muestreos mediante transectos lineales. Revisión mensual y consolidación de base de datos",
-                "resp": "Monitores comunitarios, Patricio Macas, Jaime, Gaby",
+                "title": "Monitores: transectos lineales para detección de amenazas y cacería furtiva (Revisión mensual)",
+                "resp": "Monitores comunitarios, Jaime, Pato Macas",
                 "time": "12 días"
             },
             {
-                "title": "Análisis de datos y estadísticos",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Análisis de datos, presiones sobre fauna e integración de medidas de prevención",
+                "resp": "Jaime, Pato Macas",
                 "time": "30 días"
             },
             {
-                "title": "Talleres comunitarios, presentación de resultados, retroalimentación y validación comunitaria",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Talleres comunitarios, presentación de resultados y acuerdos para prevención de cacería",
+                "resp": "Jaime, Pato Macas",
                 "time": "30 días"
             },
             {
-                "title": "Informe final, consolidación de bases de datos y presentación final del proyecto",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Informe final, consolidación de bases de datos y acuerdos de conservación comunitaria",
+                "resp": "Jaime, Pato Macas",
                 "time": "20 días"
             }
         ]
@@ -1589,102 +1716,25 @@
         "team": "paisaje",
         "teamName": "Equipo Paisaje",
         "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Patrullajes Comunitarios de Vigilancia",
+        "teamLeads": "Jaime, Pato Macas",
+        "title": "2.3 Patrullajes Comunitarios",
         "category": "Vigilancia Territorial",
         "icon": "fa-shield-halved",
         "microtasks": [
             {
-                "title": "Preparación de formulario",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Preparación de formulario de patrullaje",
+                "resp": "Jaime, Pato Macas",
                 "time": "2 días"
             },
             {
                 "title": "Capacitaciones permanentes a comuneros",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "resp": "Jaime, Pato Macas",
                 "time": "16 días"
             },
             {
-                "title": "Análisis de la información de los patrullajes comunitarios e informe trimestral",
-                "resp": "Patricio Macas, Jaime, Gaby",
+                "title": "Análisis de la información de patrullajes comunitarios e informe trimestral",
+                "resp": "Jaime, Pato Macas",
                 "time": "12 días"
-            }
-        ]
-    },
-    "pai_5": {
-        "team": "paisaje",
-        "teamName": "Equipo Paisaje",
-        "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Interacciones Gente-Fauna Silvestre (Mitigación)",
-        "category": "Mitigación de Conflictos",
-        "icon": "fa-house-chimney-crack",
-        "microtasks": [
-            {
-                "title": "Levantamiento de información mediante encuestas (Relacionamiento comunitario)",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "Depende de Relacionamiento Territorial"
-            },
-            {
-                "title": "Compra de equipos",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "2 días"
-            },
-            {
-                "title": "Evaluación de riesgo en fincas",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "40 días"
-            },
-            {
-                "title": "Entrega de disuasivos (Relacionamiento comunitario)",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "Depende de Relacionamiento Territorial"
-            },
-            {
-                "title": "Reuniones de seguimiento",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "30 días"
-            },
-            {
-                "title": "Análisis de información e informe semestral",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "6 días"
-            }
-        ]
-    },
-    "pai_6": {
-        "team": "paisaje",
-        "teamName": "Equipo Paisaje",
-        "teamColor": "#E7872B",
-        "teamLeads": "Patricio Macas, Jaime, Gaby",
-        "title": "Monitoreo de Primates (Balsas, Buenaventura)",
-        "category": "Monitoreo Ecológico",
-        "icon": "fa-monkey",
-        "microtasks": [
-            {
-                "title": "Diseño de muestreo",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "2 días"
-            },
-            {
-                "title": "Reuniones de coordinación en reservas",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "3 días"
-            },
-            {
-                "title": "Organización de logística y trabajo en campo",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "17 días"
-            },
-            {
-                "title": "Extracción y procesamiento de información",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "2 días"
-            },
-            {
-                "title": "Análisis e informe",
-                "resp": "Patricio Macas, Jaime, Gaby",
-                "time": "5 días"
             }
         ]
     },
@@ -2220,29 +2270,45 @@
         "x": -450,
         "y": 360
     },
-    "pai_1": {
-        "x": 240,
-        "y": -480
-    },
-    "pai_2": {
-        "x": 520,
-        "y": -480
+    "pai_0": {
+        "x": 420,
+        "y": -540
     },
     "pai_6": {
-        "x": 520,
-        "y": -240
-    },
-    "pai_4": {
         "x": 240,
-        "y": -20
+        "y": -360
     },
-    "pai_3": {
-        "x": 520,
-        "y": -20
+    "pai_coord": {
+        "x": 560,
+        "y": -360
+    },
+    "pai_val": {
+        "x": 560,
+        "y": -180
+    },
+    "pai_1": {
+        "x": 380,
+        "y": 20
+    },
+    "pai_2": {
+        "x": 640,
+        "y": 20
+    },
+    "pai_acciones": {
+        "x": 420,
+        "y": 220
     },
     "pai_5": {
-        "x": 380,
-        "y": 260
+        "x": 220,
+        "y": 420
+    },
+    "pai_3": {
+        "x": 420,
+        "y": 420
+    },
+    "pai_4": {
+        "x": 640,
+        "y": 420
     },
     "tec_1": {
         "x": 1180,
@@ -2401,12 +2467,6 @@
     },
     {
         "from": "tec_6",
-        "to": "tec_7",
-        "arrows": "to",
-        "label": "Infraestructura GPU en Azure aprovisionada para empaquetado Docker"
-    },
-    {
-        "from": "tec_6",
         "to": "tec_8",
         "arrows": "to",
         "label": "Servidores y almacenamiento en la nube conectados a la plataforma web HITL"
@@ -2460,6 +2520,12 @@
         "arrows": "to",
         "label": "Herramientas de software automatizan generación de bases de datos",
         "dashes": true
+    },
+    {
+        "from": "tec_11",
+        "to": "tec_2",
+        "arrows": "to",
+        "label": "Reportes biológicos y audios validados alimentan los análisis especializados y modelos de ocupación por especie"
     },
     {
         "from": "tec_11",
@@ -2531,9 +2597,9 @@
     },
     {
         "from": "adm_1",
-        "to": "esp_1",
+        "to": "esp_2",
         "arrows": "to",
-        "label": "Administración (Andrés) gestiona permisos MAE y autorizaciones en reservas para campañas de especies",
+        "label": "Administración (Andrés) gestiona permisos MAE y autorizaciones en reservas para salidas de campo del equipo de especies",
         "dashes": [
             6,
             4
@@ -2541,13 +2607,19 @@
     },
     {
         "from": "adm_1",
-        "to": "pai_1",
+        "to": "pai_coord",
         "arrows": "to",
-        "label": "Administración (Andrés) gestiona permisos MAE requeridos para instalación de equipos en paisaje",
+        "label": "Administración (Andrés) gestiona permisos MAE requeridos para muestreos de paisaje",
         "dashes": [
             6,
             4
         ]
+    },
+    {
+        "from": "esp_2",
+        "to": "esp_1",
+        "arrows": "to",
+        "label": "Diseño metodológico y priorización de especies define sitios y campañas de monitoreo acústico y fototrampeo"
     },
     {
         "from": "esp_2",
@@ -2647,43 +2719,58 @@
         "label": "Evidencia bioacústica de especies focales consolida acciones de conservación global"
     },
     {
-        "from": "pai_1",
-        "to": "pai_2",
-        "arrows": "to",
-        "label": "Estratificación de hábitats del paisaje guía el muestreo de especies focales",
-        "dashes": true
-    },
-    {
-        "from": "pai_2",
+        "from": "pai_0",
         "to": "pai_6",
         "arrows": "to",
-        "label": "Transectos de especies se sincronizan con puntos de monitoreo de Primates"
+        "label": "Diseño de muestreo general guía el monitoreo de primates en reservas Balsas y Buenaventura"
     },
     {
-        "from": "pai_4",
-        "to": "pai_3",
+        "from": "pai_0",
+        "to": "pai_coord",
         "arrows": "to",
-        "label": "Alertas y datos de patrullajes comunitarios retroalimentan el estudio de cacería"
+        "label": "Diseño de muestreo pasa a reuniones de coordinación y solicitud de permisos MAE"
     },
     {
-        "from": "pai_3",
-        "to": "pai_5",
+        "from": "pai_coord",
+        "to": "pai_1",
         "arrows": "to",
-        "label": "Mapeo de uso de fauna identifica áreas críticas para mitigación de conflictos",
-        "dashes": true
+        "label": "Coordinación y permisos habilitan el despliegue del muestreo de paisaje (cámaras trampa y audios 255 días)"
     },
     {
-        "from": "pai_4",
-        "to": "pai_5",
+        "from": "pai_coord",
+        "to": "pai_val",
         "arrows": "to",
-        "label": "Patrulleros reportan ataques de carnívoros para instalación rápida de disuasivos",
-        "dashes": true
+        "label": "Permisos y coordinación aprobados habilitan la validación de puntos en campo"
+    },
+    {
+        "from": "pai_val",
+        "to": "pai_2",
+        "arrows": "to",
+        "label": "Puntos validados en campo inician el muestreo de especies focales (140 días)"
     },
     {
         "from": "pai_1",
+        "to": "pai_acciones",
+        "arrows": "to",
+        "label": "Datos y hallazgos del muestreo de paisaje (1.2.1.1) orientan las acciones de conservación territorial (2)"
+    },
+    {
+        "from": "pai_acciones",
         "to": "pai_5",
         "arrows": "to",
-        "label": "Registros de fototrampeo en paisaje identifican corredores de grandes carnívoros"
+        "label": "Eje de conservación territorial coordina acciones de mitigación gente-fauna"
+    },
+    {
+        "from": "pai_acciones",
+        "to": "pai_3",
+        "arrows": "to",
+        "label": "Eje de conservación territorial coordina acciones y acuerdos comunitarios para prevención de cacería"
+    },
+    {
+        "from": "pai_acciones",
+        "to": "pai_4",
+        "arrows": "to",
+        "label": "Eje de conservación territorial coordina patrullajes comunitarios de vigilancia"
     },
     {
         "from": "inv_1",
@@ -2733,21 +2820,13 @@
         "from": "esp_1",
         "to": "tec_1",
         "arrows": "to",
-        "label": "Equipo Especies envía archivos crudos de audio y fototrampeo a Tecnología para respaldo",
-        "dashes": [
-            6,
-            4
-        ]
+        "label": "Equipo Especies envía archivos crudos de audio y fototrampeo a Tecnología para respaldo"
     },
     {
         "from": "tec_11",
         "to": "esp_1",
         "arrows": "to",
-        "label": "Tecnología entrega paquetes validados por IA e informes biológicos al Equipo Especies",
-        "dashes": [
-            6,
-            4
-        ]
+        "label": "Tecnología entrega paquetes validados por IA e informes biológicos al Equipo Especies"
     },
     {
         "from": "esp_2",
@@ -2763,21 +2842,13 @@
         "from": "pai_1",
         "to": "tec_1",
         "arrows": "to",
-        "label": "Equipo Paisaje envía tarjetas de memoria y audios de paisaje a Pedro para procesamiento",
-        "dashes": [
-            6,
-            4
-        ]
+        "label": "Equipo Paisaje envía tarjetas de memoria, audios y respaldos a Pedro (Tecnología)"
     },
     {
         "from": "tec_11",
         "to": "pai_1",
         "arrows": "to",
-        "label": "Tecnología genera bases de datos depuradas e informes acústicos por paisaje",
-        "dashes": [
-            6,
-            4
-        ]
+        "label": "Tecnología genera bases de datos depuradas e informes acústicos por paisaje"
     },
     {
         "from": "tec_12",
@@ -2793,11 +2864,7 @@
         "from": "tec_11",
         "to": "inv_6",
         "arrows": "to",
-        "label": "Tecnología entrega bases de datos acústicas validadas (+50.000 registros) a Investigación",
-        "dashes": [
-            6,
-            4
-        ]
+        "label": "Tecnología entrega bases de datos acústicas validadas (+50.000 registros) a Investigación"
     },
     {
         "from": "tec_14",
@@ -2811,19 +2878,9 @@
     },
     {
         "from": "inv_2",
-        "to": "pai_1",
+        "to": "esp_2",
         "arrows": "to",
-        "label": "Investigación tramita y entrega permisos oficiales del MAE requeridos para muestreo en paisaje",
-        "dashes": [
-            5,
-            5
-        ]
-    },
-    {
-        "from": "inv_2",
-        "to": "esp_1",
-        "arrows": "to",
-        "label": "Investigación gestiona autorizaciones institucionales y del MAE para campañas acústicas de especies",
+        "label": "Investigación gestiona autorizaciones institucionales y permisos MAE para el programa de monitoreo de especies focalizadas",
         "dashes": [
             5,
             5
@@ -2833,7 +2890,7 @@
         "from": "esp_10",
         "to": "inv_1",
         "arrows": "to",
-        "label": "Monitoreo continuo de especies aporta datos empíricos para actualización de Planes de Acción",
+        "label": "Monitoreo continuo de especies aporta datos para actualización de planes de acción",
         "dashes": [
             6,
             4
@@ -2843,20 +2900,10 @@
         "from": "pai_3",
         "to": "inv_7",
         "arrows": "to",
-        "label": "Estudios de cacería justifican reportes técnicos y entregables a donantes",
+        "label": "Acuerdos y diagnósticos de prevención de cacería justifican reportes técnicos y entregables a donantes",
         "dashes": [
             5,
             5
-        ]
-    },
-    {
-        "from": "inv_4",
-        "to": "pai_3",
-        "arrows": "to",
-        "label": "Practicantes y pasantes universitarios se asignan como apoyo en territorio para cacería y talleres",
-        "dashes": [
-            4,
-            4
         ]
     },
     {
@@ -2867,16 +2914,6 @@
         "dashes": [
             5,
             5
-        ]
-    },
-    {
-        "from": "pai_5",
-        "to": "esp_10",
-        "arrows": "to",
-        "label": "Medidas de mitigación en fincas protegen hábitats críticos de especies amenazadas",
-        "dashes": [
-            6,
-            4
         ]
     }
 ].map(e => {
@@ -3009,7 +3046,8 @@
             if ((s.includes('gaby') || s.includes('gabi')) && (r.includes('gaby') || r.includes('gabi'))) return true;
             if ((s.includes('jose') || s.includes('leon')) && (r.includes('jose') || r.includes('leon'))) return true;
             if (s.includes('liz') && r.includes('liz')) return true;
-            if (s.includes('pedro') && r.includes('pedro')) return true;
+            if ((s.includes('pedro') || s.includes('tecnologia, ia') || s.includes('coordinacion de tecnologia')) && 
+                (r.includes('pedro') || r.includes('tecnologia, ia') || r.includes('coordinacion de tecnologia') || r.includes('equipo de tecnologia aplicada'))) return true;
             if (s.includes('christian') && (r.includes('christian') || r.includes('christia'))) return true;
             if (s.includes('guardaparque') && r.includes('guardaparque')) return true;
             if (s.includes('monitor') && r.includes('monitor')) return true;
